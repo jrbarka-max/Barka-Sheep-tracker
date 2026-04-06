@@ -3,1389 +3,1571 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barka Sheep Tracker - Cloud Synced</title>
+    <title>Barka Sheep Tracker</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            line-height: 1.5;
-        }
-
-        .app-container {
-            min-height: 100vh;
-            background: linear-gradient(to bottom right, #f0fdf4, #d1fae5);
-            padding: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .app-container {
-                padding: 2rem;
-            }
-        }
-
-        .max-w-container {
-            max-width: 72rem;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .header-flex {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .title {
-            font-size: 1.875rem;
-            font-weight: bold;
-            color: #065f46;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #4b5563;
-        }
-
-        .cloud-badge {
-            background: #dbeafe;
-            border: 1px solid #93c5fd;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            max-width: 20rem;
-        }
-
-        .cloud-title {
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #1e3a8a;
-            margin-bottom: 0.25rem;
-        }
-
-        .cloud-text {
-            font-size: 0.75rem;
-            color: #1e40af;
-        }
-
-        .sync-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .sync-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-        }
-
-        .sync-indicator.syncing {
-            background: #f59e0b;
-            animation: pulse 1.5s infinite;
-        }
-
-        .sync-indicator.error {
-            background: #ef4444;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .sync-text {
-            font-size: 0.75rem;
-            color: #6b7280;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid #e5e7eb;
-            overflow-x: auto;
-        }
-
-        .tab {
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border-bottom: 2px solid transparent;
-            background: none;
-            border-left: none;
-            border-right: none;
-            border-top: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-            color: #6b7280;
-        }
-
-        .tab:hover {
-            color: #374151;
-        }
-
-        .tab.active {
-            border-bottom-color: #16a34a;
-            color: #15803d;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        @media (min-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        .stat-card {
-            border-radius: 0.5rem;
-            padding: 1rem;
-            border: 1px solid;
-        }
-
-        .stat-card.green {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-        }
-
-        .stat-card.blue {
-            background: #eff6ff;
-            border-color: #bfdbfe;
-        }
-
-        .stat-card.pink {
-            background: #fdf2f8;
-            border-color: #fbcfe8;
-        }
-
-        .stat-card.amber {
-            background: #fffbeb;
-            border-color: #fde68a;
-        }
-
-        .stat-card.gray {
-            background: #f9fafb;
-            border-color: #e5e7eb;
-        }
-
-        .stat-card.red {
-            background: #fef2f2;
-            border-color: #fecaca;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .stat-value.green { color: #15803d; }
-        .stat-value.blue { color: #1e40af; }
-        .stat-value.pink { color: #be185d; }
-        .stat-value.amber { color: #b45309; }
-        .stat-value.gray { color: #374151; }
-        .stat-value.red { color: #b91c1c; }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: #4b5563;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .form-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.25rem;
-        }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            font-size: 1rem;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #16a34a;
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-        }
-
-        .form-hint {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-top: 0.25rem;
-        }
-
-        .col-span-3 {
-            grid-column: span 1;
-        }
-
-        @media (min-width: 768px) {
-            .col-span-3 {
-                grid-column: span 3;
-            }
-        }
-
-        .col-span-2 {
-            grid-column: span 1;
-        }
-
-        @media (min-width: 768px) {
-            .col-span-2 {
-                grid-column: span 2;
-            }
-        }
-
-        .btn {
-            padding: 0.5rem 1.5rem;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: #16a34a;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #15803d;
-        }
-
-        .btn-secondary {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #1d4ed8;
-        }
-
-        .btn-secondary:disabled {
-            background: #d1d5db;
-            cursor: not-allowed;
-        }
-
-        .btn-cloud {
-            background: #8b5cf6;
-            color: white;
-        }
-
-        .btn-cloud:hover {
-            background: #7c3aed;
-        }
-
-        .btn-cloud:disabled {
-            background: #d1d5db;
-            cursor: not-allowed;
-        }
-
-        .btn-icon {
-            padding: 0.5rem;
-            border: none;
-            background: none;
-            cursor: pointer;
-            color: #dc2626;
-            transition: color 0.2s;
-        }
-
-        .btn-icon:hover {
-            color: #991b1b;
-        }
-
-        .section-header {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .toolbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .search-wrapper {
-            position: relative;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-        }
-
-        .search-input {
-            padding-left: 2.5rem;
-            padding-right: 1rem;
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #16a34a;
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead tr {
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        th {
-            text-align: left;
-            padding: 0.75rem 1rem;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .badge.ram {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge.ewe {
-            background: #fce7f3;
-            color: #be185d;
-        }
-
-        .badge.sold {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .badge.died {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .text-gray-900 { color: #111827; }
-        .text-gray-700 { color: #374151; }
-        .text-gray-600 { color: #4b5563; }
-        .text-gray-500 { color: #6b7280; }
-
-        .font-medium { font-weight: 500; }
-        .font-semibold { font-weight: 600; }
-        .font-bold { font-weight: 700; }
-
-        .capitalize { text-transform: capitalize; }
-
-        .truncate {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 20rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 0;
-            color: #6b7280;
-        }
-
-        .loading {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(to bottom right, #f0fdf4, #d1fae5);
-        }
-
-        .loading-text {
-            color: #15803d;
-            font-size: 1.125rem;
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 0.375rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .alert.success {
-            background: #dcfce7;
-            border: 1px solid #86efac;
-            color: #166534;
-        }
-
-        .alert.error {
-            background: #fee2e2;
-            border: 1px solid #fca5a5;
-            color: #991b1b;
-        }
-
-        .alert.warning {
-            background: #fef3c7;
-            border: 1px solid #fde047;
-            color: #854d0e;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto',sans-serif; -webkit-font-smoothing:antialiased; line-height:1.5; }
+        .app-container { min-height:100vh; background:linear-gradient(to bottom right,#f0fdf4,#d1fae5); padding:1rem; }
+        @media(min-width:768px){.app-container{padding:2rem;}}
+        .max-w { max-width:72rem; margin:0 auto; }
+        .card { background:white; border-radius:.5rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1); padding:1.5rem; margin-bottom:1.5rem; }
+
+        /* Header */
+        .header-flex { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem; }
+        .title { font-size:1.875rem; font-weight:bold; color:#065f46; margin-bottom:.25rem; }
+        .subtitle { color:#4b5563; font-size:.875rem; }
+        .cloud-badge { background:#dbeafe; border:1px solid #93c5fd; border-radius:.5rem; padding:.75rem; min-width:200px; }
+        .cloud-title { font-size:.75rem; font-weight:500; color:#1e3a8a; margin-bottom:.25rem; }
+        .cloud-text { font-size:.75rem; color:#1e40af; }
+        .sync-row { display:flex; align-items:center; gap:.5rem; margin-top:.5rem; }
+        .dot { width:8px; height:8px; border-radius:50%; background:#10b981; flex-shrink:0; }
+        .dot.syncing { background:#f59e0b; animation:pulse 1.5s infinite; }
+        .dot.error { background:#ef4444; }
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        .sync-text { font-size:.75rem; color:#6b7280; }
+
+        /* Tabs */
+        .tabs { display:flex; gap:.25rem; border-bottom:1px solid #e5e7eb; overflow-x:auto; margin-top:1rem; margin-bottom:1.5rem; }
+        .tab { padding:.5rem .9rem; font-size:.875rem; font-weight:500; display:flex; align-items:center; gap:.4rem; border:none; border-bottom:2px solid transparent; background:none; cursor:pointer; color:#6b7280; white-space:nowrap; transition:all .15s; }
+        .tab:hover { color:#374151; }
+        .tab.active { border-bottom-color:#16a34a; color:#15803d; }
+
+        /* EID bar */
+        .eid-bar { background:#f0fdf4; border:2px solid #16a34a; border-radius:.5rem; padding:.875rem 1.125rem; margin-bottom:1.25rem; }
+        .eid-top { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
+        .eid-label { font-size:.7rem; font-weight:700; color:#15803d; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
+        .eid-input { flex:1; min-width:150px; padding:.45rem .7rem; border:1px solid #d1d5db; border-radius:.375rem; font-size:1rem; font-family:monospace; }
+        .eid-input:focus { outline:none; border-color:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.12); }
+        .eid-hint { font-size:.7rem; color:#6b7280; margin-top:.4rem; }
+        .eid-result { margin-top:.875rem; padding:.875rem; background:white; border:1px solid #bbf7d0; border-radius:.375rem; }
+        .eid-result.not-found { border-color:#fde68a; background:#fffbeb; }
+        .eid-result-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.5rem; margin-bottom:.6rem; }
+        .eid-tag { font-size:1.1rem; font-weight:700; font-family:monospace; color:#065f46; }
+        .eid-tag-alt { font-size:.75rem; color:#6b7280; font-family:monospace; }
+        .eid-actions { display:flex; gap:.4rem; flex-wrap:wrap; }
+        .eid-detail { display:flex; gap:1rem; flex-wrap:wrap; font-size:.8rem; color:#374151; }
+        .eid-detail span { color:#6b7280; }
+        .eid-section-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin:8px 0 4px; }
+        .eid-section-label.green { color:#15803d; }
+        .eid-section-label.blue { color:#1e40af; }
+        .eid-section-label.red { color:#b91c1c; }
+        .eid-section-label.purple { color:#6d28d9; }
+        .eid-section-label.gray { color:#6b7280; }
+        .eid-hist-row { font-size:.78rem; color:#374151; padding:3px 0; border-bottom:1px solid #f3f4f6; display:flex; justify-content:space-between; gap:.5rem; }
+        .eid-hist-row:last-child { border-bottom:none; }
+        .lamb-chip { font-size:.75rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:.25rem; padding:2px 8px; color:#1e40af; }
+
+        /* Stats */
+        .stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.875rem; margin-top:1.25rem; }
+        @media(min-width:640px){.stats-grid{grid-template-columns:repeat(4,1fr);}}
+        .stat { border-radius:.5rem; padding:.875rem; border:1px solid; }
+        .stat.green{background:#f0fdf4;border-color:#bbf7d0;} .stat.blue{background:#eff6ff;border-color:#bfdbfe;} .stat.pink{background:#fdf2f8;border-color:#fbcfe8;} .stat.amber{background:#fffbeb;border-color:#fde68a;} .stat.red{background:#fef2f2;border-color:#fecaca;} .stat.gray{background:#f9fafb;border-color:#e5e7eb;}
+        .stat-val { font-size:1.4rem; font-weight:bold; }
+        .stat-val.green{color:#15803d;} .stat-val.blue{color:#1e40af;} .stat-val.pink{color:#be185d;} .stat-val.amber{color:#b45309;} .stat-val.red{color:#b91c1c;} .stat-val.gray{color:#374151;}
+        .stat-label { font-size:.8rem; color:#4b5563; margin-top:2px; }
+
+        /* Forms */
+        .form-grid { display:grid; grid-template-columns:1fr; gap:.875rem; }
+        @media(min-width:640px){.form-grid{grid-template-columns:repeat(3,1fr);}}
+        .form-group { display:flex; flex-direction:column; }
+        .form-label { font-size:.875rem; font-weight:500; color:#374151; margin-bottom:.25rem; }
+        .form-input,.form-select,.form-textarea { width:100%; padding:.45rem .7rem; border:1px solid #d1d5db; border-radius:.375rem; font-size:.9375rem; background:white; color:#111827; }
+        .form-input:focus,.form-select:focus,.form-textarea:focus { outline:none; border-color:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.1); }
+        .form-input.prefilled { background:#f0fdf4; border-color:#86efac; }
+        .form-hint { font-size:.7rem; color:#6b7280; margin-top:.2rem; }
+        .col2 { grid-column:span 1; } @media(min-width:640px){.col2{grid-column:span 2;}}
+        .col3 { grid-column:span 1; } @media(min-width:640px){.col3{grid-column:span 3;}}
+        .section-head { font-size:1.125rem; font-weight:600; color:#1f2937; display:flex; align-items:center; gap:.5rem; margin-bottom:.875rem; }
+
+        /* Buttons */
+        .btn { padding:.45rem 1.25rem; font-weight:500; border-radius:.375rem; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:.4rem; transition:all .15s; font-size:.875rem; }
+        .btn-primary{background:#16a34a;color:white;} .btn-primary:hover{background:#15803d;}
+        .btn-blue{background:#2563eb;color:white;} .btn-blue:hover{background:#1d4ed8;}
+        .btn-cloud{background:#8b5cf6;color:white;} .btn-cloud:hover{background:#7c3aed;}
+        .btn-amber{background:#f59e0b;color:white;} .btn-amber:hover{background:#d97706;}
+        .btn-red{background:#dc2626;color:white;} .btn-red:hover{background:#b91c1c;}
+        .btn-gray{background:#6b7280;color:white;} .btn-gray:hover{background:#4b5563;}
+        .btn-outline{background:none;border:1px solid #d1d5db;color:#374151;} .btn-outline:hover{background:#f9fafb;}
+        .btn-sm{padding:.3rem .8rem;font-size:.8125rem;}
+        .btn-icon{padding:.4rem;border:none;background:none;cursor:pointer;color:#dc2626;transition:color .15s;}
+        .btn-icon:hover{color:#991b1b;}
+        .btn-icon.amber{color:#d97706;} .btn-icon.amber:hover{color:#b45309;}
+        .btn-icon.blue{color:#2563eb;} .btn-icon.blue:hover{color:#1d4ed8;}
+        .btn-icon.green{color:#16a34a;} .btn-icon.green:hover{color:#15803d;}
+        .btn:disabled{background:#d1d5db;cursor:not-allowed;opacity:.6;}
+
+        /* Table */
+        .toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:.875rem; flex-wrap:wrap; gap:.75rem; }
+        .tbl-wrap { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; }
+        thead tr { background:#f9fafb; border-bottom:1px solid #e5e7eb; }
+        th { text-align:left; padding:.6rem .875rem; font-size:.8rem; font-weight:500; color:#374151; white-space:nowrap; }
+        td { padding:.6rem .875rem; border-bottom:1px solid #f3f4f6; font-size:.8125rem; color:#111827; }
+        tbody tr:hover td { background:#f9fafb; }
+        .empty { text-align:center; padding:2.5rem 0; color:#6b7280; font-size:.875rem; }
+
+        /* Badges */
+        .badge { display:inline-block; padding:.2rem .5rem; border-radius:9999px; font-size:.7rem; font-weight:500; }
+        .badge.ram,.badge.male{background:#dbeafe;color:#1e40af;} .badge.ewe,.badge.female{background:#fce7f3;color:#be185d;}
+        .badge.sold{background:#dcfce7;color:#15803d;} .badge.died{background:#fee2e2;color:#b91c1c;}
+        .badge.retagged{background:#ede9fe;color:#6d28d9;}
+        .badge.active{background:#dcfce7;color:#15803d;} .badge.complete{background:#f3f4f6;color:#6b7280;}
+        .badge.cidr{background:#fef3c7;color:#92400e;}
+
+        /* Search */
+        .search-wrap { position:relative; }
+        .search-ico { position:absolute; left:.65rem; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none; }
+        .search-input { padding:.4rem .875rem .4rem 2.1rem; border:1px solid #d1d5db; border-radius:.375rem; font-size:.875rem; background:white; color:#111827; }
+        .search-input:focus { outline:none; border-color:#16a34a; box-shadow:0 0 0 2px rgba(22,163,74,.1); }
+
+        /* Modal */
+        .overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:200; padding:1rem; }
+        .modal { background:white; border-radius:.5rem; box-shadow:0 20px 40px rgba(0,0,0,.2); padding:1.5rem; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; }
+        .modal-title { font-size:1.0625rem; font-weight:600; color:#1f2937; margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
+        .modal-footer { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1rem; padding-top:.75rem; border-top:1px solid #f3f4f6; }
+
+        /* Alerts */
+        .alert { padding:.75rem 1rem; border-radius:.375rem; margin-bottom:.875rem; display:flex; align-items:flex-start; gap:.65rem; font-size:.875rem; }
+        .alert.success{background:#dcfce7;border:1px solid #86efac;color:#166534;}
+        .alert.error{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;}
+        .alert.warning{background:#fef3c7;border:1px solid #fde047;color:#854d0e;}
+        .alert.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+
+        /* Sale groups */
+        .sale-summary { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; margin-bottom:1rem; }
+        @media(min-width:540px){.sale-summary{grid-template-columns:repeat(3,1fr);}}
+        .sale-stat { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:.5rem; padding:.75rem; text-align:center; }
+        .sale-stat-val { font-size:1.25rem; font-weight:700; color:#15803d; }
+        .sale-stat-label { font-size:.7rem; color:#4b5563; margin-top:2px; }
+        .sale-stat.highlight { background:#fffbeb; border-color:#fde68a; }
+        .sale-stat.highlight .sale-stat-val { color:#b45309; }
+        .animal-pick-row { display:flex; align-items:center; padding:6px 10px; border-bottom:1px solid #f3f4f6; gap:8px; cursor:pointer; }
+        .animal-pick-row:hover { background:#f0fdf4; }
+        .animal-pick-row:last-child { border-bottom:none; }
+        .animal-pick-row input[type=checkbox] { width:16px; height:16px; accent-color:#16a34a; flex-shrink:0; cursor:pointer; }
+        .group-animal-chip { display:inline-flex; align-items:center; gap:4px; background:#f0fdf4; border:1px solid #86efac; border-radius:.375rem; padding:3px 8px; font-size:.8rem; font-family:monospace; }
+        .group-animal-chip button { background:none; border:none; cursor:pointer; color:#dc2626; font-size:.9rem; line-height:1; padding:0 0 0 2px; }
+        .price-calc { background:#f9fafb; border:1px solid #e5e7eb; border-radius:.5rem; padding:1rem; margin-top:.75rem; }
+        .price-calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+        .saved-group-card { border:1px solid #e5e7eb; border-radius:.5rem; margin-bottom:.75rem; overflow:hidden; }
+        .saved-group-header { background:#f9fafb; padding:.75rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; cursor:pointer; }
+        .saved-group-header:hover { background:#f0fdf4; }
+        .saved-group-body { padding:.875rem 1rem; border-top:1px solid #e5e7eb; }
+        .saved-group-stats { display:flex; gap:1.5rem; flex-wrap:wrap; font-size:.8rem; color:#374151; margin-bottom:.75rem; }
+        .saved-group-stats span { color:#6b7280; }
+
+        /* Breeding */
+        .breeding-card { border:1px solid #e5e7eb; border-radius:.5rem; margin-bottom:.75rem; overflow:hidden; }
+        .breeding-card-head { background:#f9fafb; padding:.75rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; cursor:pointer; }
+        .breeding-card-head:hover { background:#f0fdf4; }
+        .breeding-card-body { padding:.875rem 1rem; border-top:1px solid #e5e7eb; }
+        .cidr-card { border:1px solid #fde68a; border-radius:.5rem; padding:.875rem; margin-bottom:.75rem; background:#fffbeb; }
+
+        .loading { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(to bottom right,#f0fdf4,#d1fae5); }
+        .loading-text { color:#15803d; font-size:1.125rem; }
+        .truncate { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px; }
+        .mono { font-family:monospace; }
+        .retag-trail { font-size:.7rem; color:#6b7280; font-family:monospace; }
     </style>
 </head>
 <body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        // Google Apps Script Web App URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxH91xJ1RubCKLBR_S46j5r9JQ2g0_HqAPpw1DXQz2iMQqip39AlcnYWMyeXLi5y5omiw/exec';
-
-        // Icon components
-        const Plus = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-        );
-
-        const Cloud = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-            </svg>
-        );
-
-        const RefreshCw = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <polyline points="1 20 1 14 7 14"></polyline>
-                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-            </svg>
-        );
-
-        const Download = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-        );
-
-        const Trash2 = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-        );
-
-        const Search = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-        );
-
-        const ClipboardList = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-            </svg>
-        );
-
-        const FileText = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-            </svg>
-        );
-
-        // Storage implementation
-        const storage = {
-            get: (key) => {
-                try {
-                    const value = localStorage.getItem(key);
-                    return value ? { value, key } : null;
-                } catch (error) {
-                    console.error('Storage get error:', error);
-                    return null;
-                }
-            },
-            set: (key, value) => {
-                try {
-                    localStorage.setItem(key, value);
-                    return { key, value };
-                } catch (error) {
-                    console.error('Storage set error:', error);
-                    return null;
-                }
-            }
-        };
-
-        function BarkaSheepTracker() {
-            const [lambs, setLambs] = useState([]);
-            const [disposals, setDisposals] = useState([]);
-            const [loading, setLoading] = useState(true);
-            const [searchTerm, setSearchTerm] = useState('');
-            const [activeView, setActiveView] = useState('entry');
-            const [syncStatus, setSyncStatus] = useState('synced'); // 'synced', 'syncing', 'error'
-            const [syncMessage, setSyncMessage] = useState('');
-            const [lastSyncTime, setLastSyncTime] = useState(null);
-            const [formData, setFormData] = useState({
-                tagNumber: '',
-                sex: 'ram',
-                birthWeight: '',
-                eweNumber: '',
-                numberBorn: 'single',
-                comments: '',
-                birthDate: new Date().toISOString().split('T')[0]
-            });
-            const [disposalFormData, setDisposalFormData] = useState({
-                date: new Date().toISOString().split('T')[0],
-                tagNumber: '',
-                type: 'sold',
-                cause: '',
-                weight: '',
-                buyer: '',
-                comments: ''
-            });
-
-            useEffect(() => {
-                loadData();
-                // Auto-sync every 5 minutes
-                const interval = setInterval(() => {
-                    syncWithCloud();
-                }, 300000);
-                return () => clearInterval(interval);
-            }, []);
-
-            const loadData = () => {
-                try {
-                    const lambsResult = storage.get('lambs-data');
-                    if (lambsResult && lambsResult.value) {
-                        setLambs(JSON.parse(lambsResult.value));
-                    }
-                } catch (error) {
-                    console.log('No existing lamb data found');
-                }
-
-                try {
-                    const disposalsResult = storage.get('disposals-data');
-                    if (disposalsResult && disposalsResult.value) {
-                        setDisposals(JSON.parse(disposalsResult.value));
-                    }
-                } catch (error) {
-                    console.log('No existing disposal data found');
-                }
-
-                try {
-                    const lastSync = storage.get('last-sync-time');
-                    if (lastSync && lastSync.value) {
-                        setLastSyncTime(new Date(lastSync.value));
-                    }
-                } catch (error) {
-                    console.log('No last sync time found');
-                }
-
-                setLoading(false);
-            };
-
-            const saveLambs = (updatedLambs) => {
-                try {
-                    storage.set('lambs-data', JSON.stringify(updatedLambs));
-                } catch (error) {
-                    console.error('Failed to save:', error);
-                    alert('Failed to save data. Please try again.');
-                }
-            };
-
-            const saveDisposals = (updatedDisposals) => {
-                try {
-                    storage.set('disposals-data', JSON.stringify(updatedDisposals));
-                } catch (error) {
-                    console.error('Failed to save disposals:', error);
-                    alert('Failed to save data. Please try again.');
-                }
-            };
-
-            const syncWithCloud = async () => {
-                if (SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') {
-                    setSyncStatus('error');
-                    setSyncMessage('Please configure Google Apps Script URL first');
-                    return;
-                }
-
-                setSyncStatus('syncing');
-                setSyncMessage('Syncing with cloud...');
-
-                try {
-                    // First, download data from cloud
-                    const downloadResponse = await fetch(`${SCRIPT_URL}?action=download`);
-                    const cloudData = await downloadResponse.json();
-
-                    // Merge cloud data with local data
-                    let mergedLambs = [...lambs];
-                    let mergedDisposals = [...disposals];
-
-                    if (cloudData.lambs && Array.isArray(cloudData.lambs)) {
-                        mergedLambs = mergeData(lambs, cloudData.lambs);
-                    }
-
-                    if (cloudData.disposals && Array.isArray(cloudData.disposals)) {
-                        mergedDisposals = mergeData(disposals, cloudData.disposals);
-                    }
-
-                    // Update local state with merged data
-                    setLambs(mergedLambs);
-                    setDisposals(mergedDisposals);
-                    saveLambs(mergedLambs);
-                    saveDisposals(mergedDisposals);
-
-                    // Upload local data to cloud using GET request with URL parameters
-                    // This avoids CORS issues with POST
-                    const uploadData = {
-                        lambs: mergedLambs,
-                        disposals: mergedDisposals
-                    };
-                    
-                    const uploadUrl = `${SCRIPT_URL}?action=upload&data=${encodeURIComponent(JSON.stringify(uploadData))}`;
-                    
-                    // Use an image tag trick to bypass CORS for the upload
-                    const img = new Image();
-                    img.src = uploadUrl;
-
-                    const now = new Date();
-                    setLastSyncTime(now);
-                    storage.set('last-sync-time', now.toISOString());
-                    
-                    setSyncStatus('synced');
-                    setSyncMessage('Successfully synced with cloud');
-                    
-                    // Clear success message after 3 seconds
-                    setTimeout(() => setSyncMessage(''), 3000);
-                } catch (error) {
-                    console.error('Sync error:', error);
-                    setSyncStatus('error');
-                    setSyncMessage('Sync failed: ' + error.message);
-                }
-            };
-
-            const mergeData = (localData, cloudData) => {
-                const merged = {};
-                
-                // Add all local items
-                localData.forEach(item => {
-                    merged[item.id] = item;
-                });
-
-                // Add/update with cloud items
-                cloudData.forEach(item => {
-                    merged[item.id] = item;
-                });
-
-                return Object.values(merged);
-            };
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-
-                if (!formData.tagNumber || !formData.birthWeight || !formData.eweNumber) {
-                    alert('Please fill in all required fields');
-                    return;
-                }
-
-                const newLamb = {
-                    id: Date.now().toString(),
-                    ...formData,
-                    birthWeight: parseFloat(formData.birthWeight),
-                    dateAdded: new Date().toISOString()
-                };
-
-                const updatedLambs = [newLamb, ...lambs];
-                setLambs(updatedLambs);
-                saveLambs(updatedLambs);
-
-                setFormData({
-                    tagNumber: '',
-                    sex: 'ram',
-                    birthWeight: '',
-                    eweNumber: '',
-                    numberBorn: 'single',
-                    comments: '',
-                    birthDate: new Date().toISOString().split('T')[0]
-                });
-
-                // Don't auto-sync to prevent data loss - user clicks Sync Now when ready
-            };
-
-            const deleteLamb = (id) => {
-                if (window.confirm('Are you sure you want to delete this record?')) {
-                    const updatedLambs = lambs.filter(lamb => lamb.id !== id);
-                    setLambs(updatedLambs);
-                    saveLambs(updatedLambs);
-                }
-            };
-
-            const handleDisposalSubmit = (e) => {
-                e.preventDefault();
-
-                if (!disposalFormData.date || !disposalFormData.tagNumber) {
-                    alert('Please fill in date and tag number');
-                    return;
-                }
-
-                if (disposalFormData.type === 'died' && !disposalFormData.cause) {
-                    alert('Please provide a cause of death');
-                    return;
-                }
-
-                if (disposalFormData.type === 'sold' && !disposalFormData.buyer) {
-                    alert('Please provide buyer information');
-                    return;
-                }
-
-                const newDisposal = {
-                    id: Date.now().toString(),
-                    ...disposalFormData,
-                    weight: disposalFormData.weight ? parseFloat(disposalFormData.weight) : null,
-                    dateRecorded: new Date().toISOString()
-                };
-
-                const updatedDisposals = [newDisposal, ...disposals];
-                setDisposals(updatedDisposals);
-                saveDisposals(updatedDisposals);
-
-                setDisposalFormData({
-                    date: new Date().toISOString().split('T')[0],
-                    tagNumber: '',
-                    type: 'sold',
-                    cause: '',
-                    weight: '',
-                    buyer: '',
-                    comments: ''
-                });
-
-                // Don't auto-sync to prevent data loss - user clicks Sync Now when ready
-            };
-
-            const deleteDisposal = (id) => {
-                if (window.confirm('Are you sure you want to delete this record?')) {
-                    const updatedDisposals = disposals.filter(disposal => disposal.id !== id);
-                    setDisposals(updatedDisposals);
-                    saveDisposals(updatedDisposals);
-                }
-            };
-
-            const exportToExcel = () => {
-                const headers = ['Lamb Tag', 'Birth Date', 'Sex', 'Birth Weight (lbs)', 'Ewe Number', 'Number Born', 'Comments'];
-                const csvRows = [headers.join(',')];
-
-                lambs.forEach(lamb => {
-                    const row = [
-                        lamb.tagNumber,
-                        new Date(lamb.birthDate || lamb.dateAdded).toLocaleDateString(),
-                        lamb.sex === 'ram' ? 'Ram' : 'Ewe',
-                        lamb.birthWeight,
-                        lamb.eweNumber,
-                        lamb.numberBorn.charAt(0).toUpperCase() + lamb.numberBorn.slice(1),
-                        `"${(lamb.comments || '').replace(/"/g, '""')}"`
-                    ];
-                    csvRows.push(row.join(','));
-                });
-
-                const csvContent = csvRows.join('\n');
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', `barka-lambs-${new Date().toISOString().split('T')[0]}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-
-            const filteredLambs = lambs.filter(lamb => {
-                const search = searchTerm.toLowerCase();
-                return (
-                    lamb.tagNumber.toLowerCase().includes(search) ||
-                    lamb.eweNumber.toLowerCase().includes(search)
-                );
-            });
-
-            const stats = {
-                total: lambs.length,
-                rams: lambs.filter(l => l.sex === 'ram').length,
-                ewes: lambs.filter(l => l.sex === 'ewe').length,
-                avgWeight: lambs.length > 0
-                    ? (lambs.reduce((sum, l) => sum + l.birthWeight, 0) / lambs.length).toFixed(1)
-                    : 0
-            };
-
-            const disposalStats = {
-                total: disposals.length,
-                sold: disposals.filter(d => d.type === 'sold').length,
-                died: disposals.filter(d => d.type === 'died').length,
-            };
-
-            const filteredDisposals = disposals.filter(disposal => {
-                const search = searchTerm.toLowerCase();
-                return (
-                    disposal.tagNumber.toLowerCase().includes(search) ||
-                    (disposal.buyer && disposal.buyer.toLowerCase().includes(search)) ||
-                    (disposal.cause && disposal.cause.toLowerCase().includes(search))
-                );
-            });
-
-            if (loading) {
-                return (
-                    <div className="loading">
-                        <div className="loading-text">Loading...</div>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="app-container">
-                    <div className="max-w-container">
-                        <div className="card">
-                            <div className="header-flex">
-                                <div>
-                                    <h1 className="title">Barka Sheep Tracker</h1>
-                                    <p className="subtitle">Cloud-synced flock management</p>
-                                </div>
-                                <div className="cloud-badge">
-                                    <p className="cloud-title">☁️ Cloud Sync</p>
-                                    <p className="cloud-text">Data syncs automatically across all devices</p>
-                                    <div className="sync-status">
-                                        <div className={`sync-indicator ${syncStatus}`}></div>
-                                        <span className="sync-text">
-                                            {lastSyncTime ? `Last sync: ${lastSyncTime.toLocaleTimeString()}` : 'Not synced yet'}
-                                        </span>
-                                    </div>
-                                    <button onClick={syncWithCloud} className="btn btn-cloud" style={{marginTop: '0.5rem', width: '100%'}}>
-                                        <RefreshCw />
-                                        Sync Now
-                                    </button>
-                                </div>
-                            </div>
-
-                            {syncMessage && (
-                                <div className={`alert ${syncStatus === 'error' ? 'error' : 'success'}`} style={{marginTop: '1rem'}}>
-                                    {syncMessage}
-                                </div>
-                            )}
-
-                            <div className="tabs">
-                                <button
-                                    onClick={() => setActiveView('entry')}
-                                    className={`tab ${activeView === 'entry' ? 'active' : ''}`}
-                                >
-                                    <ClipboardList />
-                                    Birth Records
-                                </button>
-                                <button
-                                    onClick={() => setActiveView('disposals')}
-                                    className={`tab ${activeView === 'disposals' ? 'active' : ''}`}
-                                >
-                                    <FileText />
-                                    Deaths/Sales
-                                </button>
-                            </div>
-
-                            {activeView === 'entry' && (
-                                <div className="stats-grid">
-                                    <div className="stat-card green">
-                                        <div className="stat-value green">{stats.total}</div>
-                                        <div className="stat-label">Total Lambs</div>
-                                    </div>
-                                    <div className="stat-card blue">
-                                        <div className="stat-value blue">{stats.rams}</div>
-                                        <div className="stat-label">Rams</div>
-                                    </div>
-                                    <div className="stat-card pink">
-                                        <div className="stat-value pink">{stats.ewes}</div>
-                                        <div className="stat-label">Ewes</div>
-                                    </div>
-                                    <div className="stat-card amber">
-                                        <div className="stat-value amber">{stats.avgWeight}</div>
-                                        <div className="stat-label">Avg Weight (lbs)</div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {activeView === 'entry' && (
-                            <>
-                                <div className="card">
-                                    <h2 className="section-header">
-                                        <Plus />
-                                        Add New Lamb
-                                    </h2>
-
-                                    <form onSubmit={handleSubmit} className="form-grid">
-                                        <div className="form-group">
-                                            <label className="form-label">Lamb Tag Number *</label>
-                                            <input
-                                                type="text"
-                                                value={formData.tagNumber}
-                                                onChange={(e) => setFormData({...formData, tagNumber: e.target.value})}
-                                                className="form-input"
-                                                placeholder="e.g., L001 or scan RFID tag"
-                                                required
-                                                autoComplete="off"
-                                            />
-                                            <p className="form-hint">Click here and scan RFID tag, or type manually</p>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">Birth Date *</label>
-                                            <input
-                                                type="date"
-                                                value={formData.birthDate}
-                                                onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
-                                                className="form-input"
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">Sex *</label>
-                                            <select
-                                                value={formData.sex}
-                                                onChange={(e) => setFormData({...formData, sex: e.target.value})}
-                                                className="form-select"
-                                            >
-                                                <option value="ram">Ram</option>
-                                                <option value="ewe">Ewe</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">Birth Weight (lbs) *</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                value={formData.birthWeight}
-                                                onChange={(e) => setFormData({...formData, birthWeight: e.target.value})}
-                                                className="form-input"
-                                                placeholder="e.g., 8.5"
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">Ewe Number *</label>
-                                            <input
-                                                type="text"
-                                                value={formData.eweNumber}
-                                                onChange={(e) => setFormData({...formData, eweNumber: e.target.value})}
-                                                className="form-input"
-                                                placeholder="e.g., E042"
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">Number Born *</label>
-                                            <select
-                                                value={formData.numberBorn}
-                                                onChange={(e) => setFormData({...formData, numberBorn: e.target.value})}
-                                                className="form-select"
-                                            >
-                                                <option value="single">Single</option>
-                                                <option value="twin">Twin</option>
-                                                <option value="triplet">Triplet</option>
-                                                <option value="quad">Quad</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="form-group col-span-3">
-                                            <label className="form-label">Comments / Complications</label>
-                                            <textarea
-                                                value={formData.comments}
-                                                onChange={(e) => setFormData({...formData, comments: e.target.value})}
-                                                className="form-textarea"
-                                                placeholder="e.g., assisted birth, weak, bottle fed, etc."
-                                                rows="2"
-                                            />
-                                        </div>
-
-                                        <div className="col-span-3">
-                                            <button type="submit" className="btn btn-primary">
-                                                <Plus />
-                                                Add Lamb
-                                            </button>
-                                            <p className="form-hint" style={{marginTop: '0.5rem'}}>Click "Sync Now" button above to upload to cloud</p>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <div className="card">
-                                    <div className="toolbar">
-                                        <h2 className="section-header" style={{marginBottom: 0}}>Lamb Records</h2>
-                                        <div className="toolbar-actions">
-                                            <button
-                                                onClick={exportToExcel}
-                                                disabled={lambs.length === 0}
-                                                className="btn btn-secondary"
-                                            >
-                                                <Download />
-                                                Export CSV
-                                            </button>
-                                            <div className="search-wrapper">
-                                                <div className="search-icon">
-                                                    <Search />
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                    placeholder="Search..."
-                                                    className="search-input"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {filteredLambs.length === 0 ? (
-                                        <div className="empty-state">
-                                            {lambs.length === 0 ? (
-                                                <p>No lambs recorded yet. Add your first lamb above!</p>
-                                            ) : (
-                                                <p>No lambs match your search.</p>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="table-container">
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Tag #</th>
-                                                        <th>Birth Date</th>
-                                                        <th>Sex</th>
-                                                        <th>Weight</th>
-                                                        <th>Ewe #</th>
-                                                        <th>Born</th>
-                                                        <th>Comments</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {filteredLambs.map((lamb) => (
-                                                        <tr key={lamb.id}>
-                                                            <td className="font-medium text-gray-900">{lamb.tagNumber}</td>
-                                                            <td className="text-gray-700">
-                                                                {new Date(lamb.birthDate || lamb.dateAdded).toLocaleDateString()}
-                                                            </td>
-                                                            <td>
-                                                                <span className={`badge ${lamb.sex}`}>
-                                                                    {lamb.sex === 'ram' ? 'Ram' : 'Ewe'}
-                                                                </span>
-                                                            </td>
-                                                            <td className="text-gray-700">{lamb.birthWeight} lbs</td>
-                                                            <td className="text-gray-700">{lamb.eweNumber}</td>
-                                                            <td>
-                                                                <span className="capitalize text-gray-700">{lamb.numberBorn}</span>
-                                                            </td>
-                                                            <td className="text-gray-600 truncate" title={lamb.comments}>
-                                                                {lamb.comments || '—'}
-                                                            </td>
-                                                            <td>
-                                                                <button
-                                                                    onClick={() => deleteLamb(lamb.id)}
-                                                                    className="btn-icon"
-                                                                    title="Delete record"
-                                                                >
-                                                                    <Trash2 />
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        )}
-
-                        {activeView === 'disposals' && (
-                            <>
-                                <div className="card">
-                                    <h2 className="section-header">
-                                        <Plus />
-                                        Record Death or Sale
-                                    </h2>
-
-                                    <form onSubmit={handleDisposalSubmit} className="form-grid">
-                                        <div className="form-group">
-                                            <label className="form-label">Date *</label>
-                                            <input
-                                                type="date"
-                                                value={disposalFormData.date}
-                                                onChange={(e) => setDisposalFormData({...disposalFormData, date: e.target.value})}
-                                                className="form-input"
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">Lamb Tag Number *</label>
-                                            <input
-                                                type="text"
-                                                value={disposalFormData.tagNumber}
-                                                onChange={(e) => setDisposalFormData({...disposalFormData, tagNumber: e.target.value})}
-                                                className="form-input"
-                                                placeholder="e.g., L001 or scan RFID tag"
-                                                required
-                                                autoComplete="off"
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">Type *</label>
-                                            <select
-                                                value={disposalFormData.type}
-                                                onChange={(e) => setDisposalFormData({...disposalFormData, type: e.target.value})}
-                                                className="form-select"
-                                            >
-                                                <option value="sold">Sold</option>
-                                                <option value="died">Died</option>
-                                            </select>
-                                        </div>
-
-                                        {disposalFormData.type === 'died' && (
-                                            <div className="form-group col-span-3">
-                                                <label className="form-label">Cause of Death *</label>
-                                                <input
-                                                    type="text"
-                                                    value={disposalFormData.cause}
-                                                    onChange={(e) => setDisposalFormData({...disposalFormData, cause: e.target.value})}
-                                                    className="form-input"
-                                                    placeholder="e.g., predator, illness"
-                                                    required
-                                                />
-                                            </div>
-                                        )}
-
-                                        {disposalFormData.type === 'sold' && (
-                                            <>
-                                                <div className="form-group">
-                                                    <label className="form-label">Sale Weight (lbs)</label>
-                                                    <input
-                                                        type="number"
-                                                        step="0.1"
-                                                        value={disposalFormData.weight}
-                                                        onChange={(e) => setDisposalFormData({...disposalFormData, weight: e.target.value})}
-                                                        className="form-input"
-                                                        placeholder="e.g., 85.5"
-                                                    />
-                                                </div>
-
-                                                <div className="form-group col-span-2">
-                                                    <label className="form-label">Buyer *</label>
-                                                    <input
-                                                        type="text"
-                                                        value={disposalFormData.buyer}
-                                                        onChange={(e) => setDisposalFormData({...disposalFormData, buyer: e.target.value})}
-                                                        className="form-input"
-                                                        placeholder="Buyer name or market"
-                                                        required
-                                                    />
-                                                </div>
-                                            </>
-                                        )}
-
-                                        <div className="form-group col-span-3">
-                                            <label className="form-label">Comments</label>
-                                            <textarea
-                                                value={disposalFormData.comments}
-                                                onChange={(e) => setDisposalFormData({...disposalFormData, comments: e.target.value})}
-                                                className="form-textarea"
-                                                placeholder="Additional notes..."
-                                                rows="2"
-                                            />
-                                        </div>
-
-                                        <div className="col-span-3">
-                                            <button type="submit" className="btn btn-primary">
-                                                <Plus />
-                                                Add Record
-                                            </button>
-                                            <p className="form-hint" style={{marginTop: '0.5rem'}}>Click "Sync Now" button above to upload to cloud</p>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <div className="card">
-                                    <div className="toolbar">
-                                        <h2 className="section-header" style={{marginBottom: 0}}>Disposal Records</h2>
-                                        <div className="search-wrapper">
-                                            <div className="search-icon">
-                                                <Search />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={searchTerm}
-                                                onChange={(e) => setSearchTerm(e.target.value)}
-                                                placeholder="Search..."
-                                                className="search-input"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {filteredDisposals.length === 0 ? (
-                                        <div className="empty-state">
-                                            <p>No disposal records yet.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="table-container">
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Date</th>
-                                                        <th>Tag #</th>
-                                                        <th>Type</th>
-                                                        <th>Cause/Buyer</th>
-                                                        <th>Weight</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {filteredDisposals.map((disposal) => (
-                                                        <tr key={disposal.id}>
-                                                            <td className="text-gray-700">
-                                                                {new Date(disposal.date).toLocaleDateString()}
-                                                            </td>
-                                                            <td className="font-medium text-gray-900">{disposal.tagNumber}</td>
-                                                            <td>
-                                                                <span className={`badge ${disposal.type}`}>
-                                                                    {disposal.type === 'sold' ? 'Sold' : 'Died'}
-                                                                </span>
-                                                            </td>
-                                                            <td className="text-gray-700">
-                                                                {disposal.type === 'sold' ? disposal.buyer : disposal.cause}
-                                                            </td>
-                                                            <td className="text-gray-700">
-                                                                {disposal.weight ? `${disposal.weight} lbs` : '—'}
-                                                            </td>
-                                                            <td>
-                                                                <button
-                                                                    onClick={() => deleteDisposal(disposal.id)}
-                                                                    className="btn-icon"
-                                                                    title="Delete record"
-                                                                >
-                                                                    <Trash2 />
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        )}
-                    </div>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const SUPABASE_URL = 'https://pjopnhgbidmpzssghyoo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqb3BuaGdiaWRtcHpzc2doeW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MjA5NDcsImV4cCI6MjA4Nzk5Njk0N30.CLBs2MDykvPEO683bNg7Rusa3foYnnzPOpyawinvFJY';
+
+const sb = async (table, method='GET', body=null, query='') => {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${query}`, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method==='POST' ? 'resolution=merge-duplicates,return=representation' : 'return=representation'
+    },
+    body: body ? JSON.stringify(body) : null
+  });
+  if(!res.ok) { const e=await res.text(); throw new Error(e); }
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+};
+
+const MED_PRODUCTS = ['CD-T','B Complex','Liquimycin','Meloxicam','Thiamine','Safe guard','Valbazen','Pancur','Nutri drench','Corid','Propylene Glycol','Nuflor','BoSe','Wormer','Other'];
+const DOSAGES = ['1','2','3','4','5','6','7','8','9','10','20','30'];
+const FEED_ITEMS = ['Grass Hay','Alfalfa','Corn','Mineral','Pellet','Soybeans','Soybean Meal','Soybean Hulls','DDGs','Corn Stalks','Beet pulp','Other'];
+const FEED_UNITS = ['Bushels','Pounds','Ton','Other'];
+const FEED_WHO = ['Ewes','Lambs','Rams','Other'];
+
+const today = () => new Date().toISOString().split('T')[0];
+const fmtDate = d => { try { return d ? new Date(d).toLocaleDateString() : '—'; } catch(e) { return d||'—'; } };
+const uid = () => Date.now().toString() + Math.random().toString(36).slice(2,6);
+
+// ── Icons ──────────────────────────────────────────────
+const Plus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+const Refresh = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
+const DL = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
+const Trash = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
+const SearchIco = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
+const ScanIco = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>;
+const TagIco = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
+const SyringeIco = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></svg>;
+const EditIco = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>;
+const LeafIco = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22 16 8M17.5 3.5S20 3 21 2c0 1-.5 3.5-.5 3.5C17 7.5 15 8 13 9c-1 1-3 3-3 3s.5-3 2-5 5-3.5 5-3.5z"/></svg>;
+const HeartIco = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>;
+
+// ── Supabase data layer ────────────────────────────────
+// Maps JS camelCase to DB snake_case
+const toDb = {
+  births: r => ({ id:r.id, tag_number:r.tagNumber, tag2:r.tag2||null, birth_date:r.birthDate||null, sex:r.sex, birth_weight:r.birthWeight||null, ewe_number:r.eweNumber, number_born:r.numberBorn, complications:r.complications||null, comments:r.comments||null, retag_history:r.retagHistory||[], date_added:r.dateAdded||new Date().toISOString() }),
+  disposals: r => ({ id:r.id, tag_number:r.tagNumber, date:r.date, what_happened:r.whatHappened||null, type:r.type||null, cause:r.cause||null, buyer:r.buyer||null, weight:r.weight||null, comments:r.comments||null, date_recorded:r.dateRecorded||new Date().toISOString() }),
+  meds: r => ({ id:r.id, tag_number:r.tagNumber, date:r.date, product:r.product, dosage:r.dosage||null, unit:r.unit||null, comment:r.comment||null, recorded:r.recorded||new Date().toISOString() }),
+  feed: r => ({ id:r.id, date:r.date, who:r.who, what_is_it:r.whatIsIt, quantity:r.quantity||null, unit:r.unit||null, comments:r.comments||null, recorded:r.recorded||new Date().toISOString() }),
+  saleGroups: r => ({ id:r.id, name:r.name, sale_date:r.saleDate, venue:r.venue||null, buyer:r.buyer||null, animals:r.animals||[], weight_mode:r.weightMode||null, total_weight:r.totalWeight||null, avg_weight:r.avgWeight||null, price_per_lb:r.pricePerLb||null, total_price:r.totalPrice||null, avg_price:r.avgPrice||null, comments:r.comments||null, recorded:r.recorded||new Date().toISOString() }),
+  retagLog: r => ({ id:r.id, old_tag:r.oldTag, new_tag:r.newTag, new_tag2:r.newTag2||null, reason:r.reason||null, date:r.date, recorded:r.recorded||new Date().toISOString() }),
+  breedingGroups: r => ({ id:r.id, name:r.name, ram_tag:r.ramTag||null, ram_name:r.ramName||null, ram_breed:r.ramBreed||null, ram_in_date:r.ramInDate||null, ram_out_date:r.ramOutDate||null, ewes:r.ewes||[], notes:r.notes||null, recorded:r.recorded||new Date().toISOString() }),
+  cidrEvents: r => ({ id:r.id, date_in:r.dateIn||null, date_out:r.dateOut||null, ewes:r.ewes||[], breeding_group_id:r.breedingGroupId||null, notes:r.notes||null, recorded:r.recorded||new Date().toISOString() }),
+};
+const fromDb = {
+  births: r => ({ id:r.id, tagNumber:r.tag_number, tag2:r.tag2||'', birthDate:r.birth_date, sex:r.sex, birthWeight:r.birth_weight, eweNumber:r.ewe_number, numberBorn:r.number_born, complications:r.complications||'', comments:r.comments||'', retagHistory:r.retag_history||[], dateAdded:r.date_added }),
+  disposals: r => ({ id:r.id, tagNumber:r.tag_number, date:r.date, whatHappened:r.what_happened||'', type:r.type||'', cause:r.cause||'', buyer:r.buyer||'', weight:r.weight, comments:r.comments||'', dateRecorded:r.date_recorded }),
+  meds: r => ({ id:r.id, tagNumber:r.tag_number, date:r.date, product:r.product, dosage:r.dosage||'', unit:r.unit||'', comment:r.comment||'', recorded:r.recorded }),
+  feed: r => ({ id:r.id, date:r.date, who:r.who, whatIsIt:r.what_is_it, quantity:r.quantity, unit:r.unit||'', comments:r.comments||'', recorded:r.recorded }),
+  saleGroups: r => ({ id:r.id, name:r.name, saleDate:r.sale_date, venue:r.venue||'', buyer:r.buyer||'', animals:r.animals||[], weightMode:r.weight_mode||'', totalWeight:r.total_weight||0, avgWeight:r.avg_weight||0, pricePerLb:r.price_per_lb||0, totalPrice:r.total_price||0, avgPrice:r.avg_price||0, comments:r.comments||'', recorded:r.recorded }),
+  retagLog: r => ({ id:r.id, oldTag:r.old_tag, newTag:r.new_tag, newTag2:r.new_tag2||'', reason:r.reason||'', date:r.date, recorded:r.recorded }),
+  breedingGroups: r => ({ id:r.id, name:r.name, ramTag:r.ram_tag||'', ramName:r.ram_name||'', ramBreed:r.ram_breed||'', ramInDate:r.ram_in_date||'', ramOutDate:r.ram_out_date||'', ewes:r.ewes||[], notes:r.notes||'', recorded:r.recorded }),
+  cidrEvents: r => ({ id:r.id, dateIn:r.date_in||'', dateOut:r.date_out||'', ewes:r.ewes||[], breedingGroupId:r.breeding_group_id||'', notes:r.notes||'', recorded:r.recorded }),
+};
+
+const TABLE = { births:'sheep_births', disposals:'sheep_disposals', meds:'sheep_meds', feed:'sheep_feed', saleGroups:'sheep_sale_groups', retagLog:'sheep_retag_log', breedingGroups:'sheep_breeding_groups', cidrEvents:'sheep_cidr_events' };
+
+// ── Medical Modal ──────────────────────────────────────
+function MedModal({ tag, onClose, onSave }) {
+  const [f, setF] = useState({ date:today(), tagNumber:tag||'', product:'', dosage:'', unit:'ML', comment:'' });
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    if(!f.tagNumber||!f.product){alert('Tag # and product required');return;}
+    setSaving(true);
+    await onSave({...f, id:uid(), recorded:new Date().toISOString()});
+    setSaving(false); onClose();
+  };
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="modal-title"><SyringeIco/> Medication / Treatment Record</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.75rem'}}>
+          <div className="form-group">
+            <label className="form-label">Tag # *</label>
+            <input className={`form-input mono ${f.tagNumber?'prefilled':''}`} value={f.tagNumber} onChange={e=>setF({...f,tagNumber:e.target.value})} placeholder="Scan or type tag #" autoComplete="off"/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Date *</label>
+            <input type="date" className="form-input" value={f.date} onChange={e=>setF({...f,date:e.target.value})}/>
+          </div>
+          <div className="form-group" style={{gridColumn:'span 2'}}>
+            <label className="form-label">Product *</label>
+            <select className="form-select" value={f.product} onChange={e=>setF({...f,product:e.target.value})}>
+              <option value="">Select product...</option>
+              {MED_PRODUCTS.map(p=><option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Dosage</label>
+            <select className="form-select" value={f.dosage} onChange={e=>setF({...f,dosage:e.target.value})}>
+              <option value="">Select...</option>
+              {DOSAGES.map(d=><option key={d} value={d}>{d}</option>)}
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Unit</label>
+            <select className="form-select" value={f.unit} onChange={e=>setF({...f,unit:e.target.value})}>
+              <option value="ML">ML</option><option value="OZ">OZ</option><option value="#">#</option>
+            </select>
+          </div>
+          <div className="form-group" style={{gridColumn:'span 2'}}>
+            <label className="form-label">Comment</label>
+            <textarea className="form-textarea" rows="2" value={f.comment} onChange={e=>setF({...f,comment:e.target.value})} placeholder="Any notes..."/>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={save} disabled={saving}><Plus/> {saving?'Saving...':'Save'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Re-tag Modal ───────────────────────────────────────
+function RetagModal({ tag, lambs, onClose, onSave }) {
+  const preselect = tag ? lambs.find(l=>String(l.tagNumber).toLowerCase()===String(tag).toLowerCase()) : null;
+  const [step, setStep] = useState(preselect?2:1);
+  const [browseSearch, setBrowseSearch] = useState(tag||'');
+  const [selected, setSelected] = useState(preselect||null);
+  const [newTag, setNewTag] = useState('');
+  const [newTag2, setNewTag2] = useState('');
+  const [reason, setReason] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const filtered = lambs.filter(l=>{
+    if(!browseSearch.trim()) return true;
+    const s=browseSearch.toLowerCase();
+    return String(l.tagNumber).toLowerCase().includes(s)||String(l.tag2||'').toLowerCase().includes(s)||String(l.eweNumber||'').toLowerCase().includes(s)||String(l.sex||'').toLowerCase().includes(s);
+  });
+
+  const pickAnimal = a => { setSelected(a); setNewTag2(a.tag2||''); setStep(2); };
+
+  const save = async () => {
+    if(!newTag.trim()){alert('New primary tag number required');return;}
+    if(lambs.find(l=>String(l.tagNumber).toLowerCase()===newTag.toLowerCase()&&l.id!==selected?.id)){alert('That tag number is already in use');return;}
+    setSaving(true);
+    await onSave({ oldTag:selected?.tagNumber||tag, newTag:newTag.trim(), newTag2:newTag2.trim(), reason, animalId:selected?.id });
+    setSaving(false); onClose();
+  };
+
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{maxWidth:600}}>
+        <div className="modal-title"><TagIco/> Re-tag Animal</div>
+        <div style={{display:'flex',gap:8,marginBottom:'1rem'}}>
+          {['1. Find animal','2. Apply new tag'].map((s,i)=>(
+            <div key={i} style={{flex:1,padding:'6px 10px',borderRadius:6,fontSize:'.8rem',fontWeight:500,textAlign:'center',background:step===i+1?'#16a34a':step>i+1?'#dcfce7':'#f3f4f6',color:step===i+1?'white':step>i+1?'#15803d':'#6b7280',border:step>i+1?'1px solid #86efac':'1px solid transparent',cursor:step>i+1?'pointer':'default'}} onClick={()=>step>i+1&&setStep(i+1)}>{step>i+1?'✓ ':''}{s}</div>
+          ))}
+        </div>
+        {step===1 && (
+          <>
+            <div className="search-wrap" style={{marginBottom:'.5rem'}}>
+              <div className="search-ico"><SearchIco/></div>
+              <input className="search-input" style={{width:'100%',paddingLeft:'2rem'}} value={browseSearch} onChange={e=>setBrowseSearch(e.target.value)} placeholder="Search tag #, ewe #, sex..." autoFocus autoComplete="off"/>
+            </div>
+            <div style={{maxHeight:300,overflowY:'auto',border:'1px solid #e5e7eb',borderRadius:6}}>
+              {filtered.length===0?<div className="empty" style={{padding:'1.5rem'}}>No animals match.</div>:(
+                <table style={{width:'100%',borderCollapse:'collapse'}}>
+                  <thead><tr style={{background:'#f9fafb',position:'sticky',top:0}}>
+                    <th style={{padding:'6px 10px',fontSize:'.75rem',fontWeight:500,color:'#374151',textAlign:'left'}}>Tag #</th>
+                    <th style={{padding:'6px 10px',fontSize:'.75rem',fontWeight:500,color:'#374151',textAlign:'left'}}>Alt</th>
+                    <th style={{padding:'6px 10px',fontSize:'.75rem',fontWeight:500,color:'#374151',textAlign:'left'}}>Sex</th>
+                    <th style={{padding:'6px 10px',fontSize:'.75rem',fontWeight:500,color:'#374151',textAlign:'left'}}>Born</th>
+                    <th style={{padding:'6px 10px',fontSize:'.75rem',fontWeight:500,color:'#374151',textAlign:'left'}}>Ewe</th>
+                    <th></th>
+                  </tr></thead>
+                  <tbody>
+                    {filtered.map(l=>(
+                      <tr key={l.id} style={{borderBottom:'1px solid #f3f4f6',cursor:'pointer'}} onClick={()=>pickAnimal(l)} onMouseEnter={e=>e.currentTarget.style.background='#f0fdf4'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                        <td style={{padding:'7px 10px',fontFamily:'monospace',fontWeight:600,fontSize:'.85rem'}}>{l.tagNumber}</td>
+                        <td style={{padding:'7px 10px',fontFamily:'monospace',fontSize:'.8rem',color:'#6b7280'}}>{l.tag2||'—'}</td>
+                        <td style={{padding:'7px 10px',fontSize:'.8rem'}}><span className={`badge ${l.sex==='male'||l.sex==='ram'?'male':'female'}`}>{l.sex}</span></td>
+                        <td style={{padding:'7px 10px',fontSize:'.8rem'}}>{fmtDate(l.birthDate)}</td>
+                        <td style={{padding:'7px 10px',fontFamily:'monospace',fontSize:'.8rem'}}>{l.eweNumber}</td>
+                        <td style={{padding:'7px 10px'}}><button className="btn btn-primary btn-sm" onClick={e=>{e.stopPropagation();pickAnimal(l);}}>Select</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </>
+        )}
+        {step===2 && selected && (
+          <>
+            <div className="alert info" style={{marginBottom:'1rem'}}>
+              <div>Selected: Tag <strong className="mono">{selected.tagNumber}</strong>{selected.tag2&&<> · Alt <span className="mono">{selected.tag2}</span></>}{selected.sex&&<> · {selected.sex}</>}{selected.birthDate&&<> · born {fmtDate(selected.birthDate)}</>}</div>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.75rem'}}>
+              <div className="form-group">
+                <label className="form-label">New primary tag # *</label>
+                <input className="form-input mono" value={newTag} onChange={e=>setNewTag(e.target.value)} placeholder="Scan or type new EID" autoFocus autoComplete="off"/>
+                <p className="form-hint">All records move to this number</p>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Second / backup tag #</label>
+                <input className="form-input mono" value={newTag2} onChange={e=>setNewTag2(e.target.value)} placeholder="Optional 2nd tag" autoComplete="off"/>
+              </div>
+              <div className="form-group" style={{gridColumn:'span 2'}}>
+                <label className="form-label">Reason</label>
+                <input className="form-input" value={reason} onChange={e=>setReason(e.target.value)} placeholder="e.g., lost tag, damaged, new EID..."/>
+              </div>
+            </div>
+          </>
+        )}
+        <div className="modal-footer">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          {step===2&&<button className="btn btn-outline" onClick={()=>setStep(1)}>← Back</button>}
+          {step===2&&<button className="btn btn-primary" onClick={save} disabled={saving}><TagIco/> {saving?'Saving...':'Apply Re-tag'}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Breeding Group Modal ───────────────────────────────
+function BreedingGroupModal({ group, lambs, onClose, onSave }) {
+  const empty = { id:uid(), name:'', ramTag:'', ramName:'', ramBreed:'', ramInDate:today(), ramOutDate:'', ewes:[], notes:'' };
+  const [f, setF] = useState(group ? {...group} : empty);
+  const [browseSearch, setBrowseSearch] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const eweLambs = lambs.filter(l=>l.sex==='female'||l.sex==='ewe');
+  const filtered = eweLambs.filter(l=>{
+    if(!browseSearch.trim()) return true;
+    const s=browseSearch.toLowerCase();
+    return String(l.tagNumber).toLowerCase().includes(s)||String(l.tag2||'').toLowerCase().includes(s);
+  });
+
+  const toggleEwe = tag => {
+    setF(prev=>({...prev, ewes: prev.ewes.includes(tag) ? prev.ewes.filter(t=>t!==tag) : [...prev.ewes, tag]}));
+  };
+
+  const save = async () => {
+    if(!f.name.trim()){alert('Group name required');return;}
+    setSaving(true);
+    await onSave({...f, recorded:new Date().toISOString()});
+    setSaving(false); onClose();
+  };
+
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{maxWidth:600}}>
+        <div className="modal-title"><HeartIco/> {group?'Edit':'New'} Breeding Group</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.75rem',marginBottom:'1rem'}}>
+          <div className="form-group" style={{gridColumn:'span 2'}}>
+            <label className="form-label">Group name *</label>
+            <input className="form-input" value={f.name} onChange={e=>setF({...f,name:e.target.value})} placeholder="e.g., Fall 2025 breeding group"/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Ram tag #</label>
+            <input className="form-input mono" value={f.ramTag} onChange={e=>setF({...f,ramTag:e.target.value})} placeholder="Scan or type"/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Ram name</label>
+            <input className="form-input" value={f.ramName} onChange={e=>setF({...f,ramName:e.target.value})} placeholder="e.g., Big Red"/>
+          </div>
+          <div className="form-group" style={{gridColumn:'span 2'}}>
+            <label className="form-label">Ram breed</label>
+            <input className="form-input" value={f.ramBreed} onChange={e=>setF({...f,ramBreed:e.target.value})} placeholder="e.g., Suffolk, Hampshire, Dorset..."/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Ram in date</label>
+            <input type="date" className="form-input" value={f.ramInDate} onChange={e=>setF({...f,ramInDate:e.target.value})}/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Ram out date</label>
+            <input type="date" className="form-input" value={f.ramOutDate} onChange={e=>setF({...f,ramOutDate:e.target.value})}/>
+          </div>
+          <div className="form-group" style={{gridColumn:'span 2'}}>
+            <label className="form-label">Notes</label>
+            <textarea className="form-textarea" rows="2" value={f.notes} onChange={e=>setF({...f,notes:e.target.value})} placeholder="Any breeding notes..."/>
+          </div>
+        </div>
+
+        <div style={{borderTop:'1px solid #f3f4f6',paddingTop:'.875rem'}}>
+          <div style={{fontWeight:600,fontSize:'.875rem',color:'#1f2937',marginBottom:'.5rem'}}>
+            Ewes in this group ({f.ewes.length} selected)
+          </div>
+          <div className="search-wrap" style={{marginBottom:'.5rem'}}>
+            <div className="search-ico"><SearchIco/></div>
+            <input className="search-input" style={{width:'100%',paddingLeft:'2rem'}} value={browseSearch} onChange={e=>setBrowseSearch(e.target.value)} placeholder="Filter ewes by tag #..."/>
+          </div>
+          <div style={{maxHeight:200,overflowY:'auto',border:'1px solid #e5e7eb',borderRadius:6}}>
+            {filtered.length===0?<div className="empty" style={{padding:'1rem'}}>No ewes in records yet.</div>:(
+              filtered.map(l=>(
+                <div key={l.id} className="animal-pick-row" onClick={()=>toggleEwe(l.tagNumber)}>
+                  <input type="checkbox" checked={f.ewes.includes(l.tagNumber)} onChange={()=>toggleEwe(l.tagNumber)} onClick={e=>e.stopPropagation()}/>
+                  <span className="mono" style={{fontWeight:600,minWidth:70}}>{l.tagNumber}</span>
+                  {l.tag2&&<span className="mono" style={{color:'#6b7280',fontSize:'.75rem'}}>{l.tag2}</span>}
+                  <span style={{fontSize:'.75rem',color:'#6b7280'}}>dam:{l.eweNumber} · {l.numberBorn}</span>
                 </div>
-            );
-        }
+              ))
+            )}
+          </div>
+          {f.ewes.length>0&&(
+            <div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:'.5rem'}}>
+              {f.ewes.map(t=>(
+                <span key={t} className="group-animal-chip">{t}<button onClick={()=>toggleEwe(t)}>×</button></span>
+              ))}
+            </div>
+          )}
+        </div>
 
-        ReactDOM.render(<BarkaSheepTracker />, document.getElementById('root'));
-    </script>
+        <div className="modal-footer">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={save} disabled={saving}><Plus/> {saving?'Saving...':'Save Group'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── CIDR Event Modal ───────────────────────────────────
+function CidrModal({ event, lambs, breedingGroups, onClose, onSave }) {
+  const empty = { id:uid(), dateIn:today(), dateOut:'', ewes:[], breedingGroupId:'', notes:'' };
+  const [f, setF] = useState(event ? {...event} : empty);
+  const [browseSearch, setBrowseSearch] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // If a breeding group is selected, pre-populate ewes
+  const handleGroupChange = gid => {
+    const g = breedingGroups.find(x=>x.id===gid);
+    setF(prev=>({...prev, breedingGroupId:gid, ewes:g?[...g.ewes]:prev.ewes}));
+  };
+
+  const eweLambs = lambs.filter(l=>l.sex==='female'||l.sex==='ewe');
+  const filtered = eweLambs.filter(l=>{
+    if(!browseSearch.trim()) return true;
+    const s=browseSearch.toLowerCase();
+    return String(l.tagNumber).toLowerCase().includes(s)||String(l.tag2||'').toLowerCase().includes(s);
+  });
+
+  const toggleEwe = tag => setF(prev=>({...prev, ewes:prev.ewes.includes(tag)?prev.ewes.filter(t=>t!==tag):[...prev.ewes,tag]}));
+
+  const save = async () => {
+    if(!f.dateIn){alert('CIDR in date required');return;}
+    setSaving(true);
+    await onSave({...f, recorded:new Date().toISOString()});
+    setSaving(false); onClose();
+  };
+
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{maxWidth:560}}>
+        <div className="modal-title">🟡 {event?'Edit':'New'} CIDR Event</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.75rem',marginBottom:'1rem'}}>
+          <div className="form-group">
+            <label className="form-label">CIDR in date *</label>
+            <input type="date" className="form-input" value={f.dateIn} onChange={e=>setF({...f,dateIn:e.target.value})}/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">CIDR out date</label>
+            <input type="date" className="form-input" value={f.dateOut} onChange={e=>setF({...f,dateOut:e.target.value})}/>
+          </div>
+          <div className="form-group" style={{gridColumn:'span 2'}}>
+            <label className="form-label">Link to breeding group (optional)</label>
+            <select className="form-select" value={f.breedingGroupId} onChange={e=>handleGroupChange(e.target.value)}>
+              <option value="">— none —</option>
+              {breedingGroups.map(g=><option key={g.id} value={g.id}>{g.name}</option>)}
+            </select>
+            <p className="form-hint">Selecting a group pre-fills the ewe list</p>
+          </div>
+          <div className="form-group" style={{gridColumn:'span 2'}}>
+            <label className="form-label">Notes</label>
+            <textarea className="form-textarea" rows="2" value={f.notes} onChange={e=>setF({...f,notes:e.target.value})} placeholder="Any notes..."/>
+          </div>
+        </div>
+
+        <div style={{borderTop:'1px solid #f3f4f6',paddingTop:'.875rem'}}>
+          <div style={{fontWeight:600,fontSize:'.875rem',color:'#1f2937',marginBottom:'.5rem'}}>Ewes receiving CIDR ({f.ewes.length})</div>
+          <div className="search-wrap" style={{marginBottom:'.5rem'}}>
+            <div className="search-ico"><SearchIco/></div>
+            <input className="search-input" style={{width:'100%',paddingLeft:'2rem'}} value={browseSearch} onChange={e=>setBrowseSearch(e.target.value)} placeholder="Filter ewes..."/>
+          </div>
+          <div style={{maxHeight:180,overflowY:'auto',border:'1px solid #e5e7eb',borderRadius:6}}>
+            {filtered.map(l=>(
+              <div key={l.id} className="animal-pick-row" onClick={()=>toggleEwe(l.tagNumber)}>
+                <input type="checkbox" checked={f.ewes.includes(l.tagNumber)} onChange={()=>toggleEwe(l.tagNumber)} onClick={e=>e.stopPropagation()}/>
+                <span className="mono" style={{fontWeight:600,minWidth:70}}>{l.tagNumber}</span>
+                {l.tag2&&<span className="mono" style={{color:'#6b7280',fontSize:'.75rem'}}>{l.tag2}</span>}
+              </div>
+            ))}
+            {filtered.length===0&&<div className="empty" style={{padding:'1rem'}}>No ewes found.</div>}
+          </div>
+          {f.ewes.length>0&&(
+            <div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:'.5rem'}}>
+              {f.ewes.map(t=><span key={t} className="group-animal-chip">{t}<button onClick={()=>toggleEwe(t)}>×</button></span>)}
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={save} disabled={saving}><Plus/> {saving?'Saving...':'Save CIDR Event'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── EID Scanner Bar ────────────────────────────────────
+function EIDBar({ lambs, disposals, medEvents, onPrefill, onMedModal, onRetagModal }) {
+  const [val, setVal] = useState('');
+  const [result, setResult] = useState(null);
+  const inputRef = useRef(null);
+  const timer = useRef(null);
+
+  const lookup = useCallback((raw) => {
+    const tag = (raw||val).trim();
+    if(!tag) return;
+    const tl = tag.toLowerCase();
+    const lamb = lambs.find(l=>String(l.tagNumber).toLowerCase()===tl||String(l.tag2||'').toLowerCase()===tl);
+    const eweLambs = lambs.filter(l=>String(l.eweNumber).toLowerCase()===tl);
+    const disp = disposals.find(d=>String(d.tagNumber).toLowerCase()===tl);
+    const meds = medEvents.filter(m=>String(m.tagNumber).toLowerCase()===tl);
+    setResult({ tag, lamb, eweLambs, disp, meds, found:!!(lamb||eweLambs.length||disp||meds.length) });
+  }, [lambs, disposals, medEvents]);
+
+  const handleChange = v => {
+    setVal(v);
+    clearTimeout(timer.current);
+    if(v.trim().length>=3) timer.current=setTimeout(()=>lookup(v.trim()),380);
+    else setResult(null);
+  };
+
+  const clear = () => { setVal(''); setResult(null); inputRef.current?.focus(); };
+
+  return (
+    <div className="eid-bar">
+      <div className="eid-top">
+        <ScanIco/><span className="eid-label">EID / Tag Lookup</span>
+        <input ref={inputRef} className="eid-input" value={val} placeholder="Scan EID or type tag number..."
+          onChange={e=>handleChange(e.target.value)} onKeyDown={e=>e.key==='Enter'&&lookup(val.trim())} autoComplete="off"/>
+        <button className="btn btn-primary btn-sm" onClick={()=>lookup(val.trim())}>Look up</button>
+        {val&&<button className="btn btn-outline btn-sm" onClick={clear}>Clear</button>}
+      </div>
+      <div className="eid-hint">Bluetooth RFID readers act as keyboards — focus this field and scan</div>
+
+      {result&&(
+        <div className={`eid-result ${!result.found?'not-found':''}`}>
+          {result.found?(
+            <>
+              <div className="eid-result-head">
+                <div>
+                  <div className="eid-tag">Tag: {result.tag}</div>
+                  {result.lamb?.tag2&&<div className="eid-tag-alt">Alt: {result.lamb.tag2}</div>}
+                </div>
+                <div className="eid-actions">
+                  <button className="btn btn-primary btn-sm" onClick={()=>{onPrefill('birth',result.tag);clear();}}><Plus/> Birth</button>
+                  <button className="btn btn-amber btn-sm" onClick={()=>onMedModal(result.tag)}><SyringeIco/> Med</button>
+                  <button className="btn btn-blue btn-sm" onClick={()=>{onPrefill('disposal',result.tag);clear();}}>Sale/Death</button>
+                  <button className="btn btn-gray btn-sm" onClick={()=>onRetagModal(result.tag)}><TagIco/> Re-tag</button>
+                </div>
+              </div>
+              {result.lamb&&(
+                <>
+                  <div className="eid-section-label green">Lamb record</div>
+                  <div className="eid-detail">
+                    <div><span>Born: </span>{fmtDate(result.lamb.birthDate)}</div>
+                    <div><span>Sex: </span><span className={`badge ${result.lamb.sex}`}>{result.lamb.sex}</span></div>
+                    <div><span>Wt: </span>{result.lamb.birthWeight} lbs</div>
+                    <div><span>Dam: </span><span className="mono">{result.lamb.eweNumber}</span></div>
+                    <div><span>Born as: </span>{result.lamb.numberBorn}</div>
+                    {result.lamb.complications&&<div><span>Compl: </span>{result.lamb.complications}</div>}
+                  </div>
+                </>
+              )}
+              {result.eweLambs?.length>0&&(
+                <>
+                  <div className="eid-section-label blue">Ewe {result.tag} — {result.eweLambs.length} lambs</div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                    {result.eweLambs.map(l=><span key={l.id} className="lamb-chip">{l.tagNumber} · {l.sex} · {l.numberBorn} · {l.birthWeight}lbs</span>)}
+                  </div>
+                </>
+              )}
+              {result.disp&&(
+                <>
+                  <div className="eid-section-label red">Disposal</div>
+                  <div className="eid-detail">
+                    <div><span>Date: </span>{fmtDate(result.disp.date)}</div>
+                    <div><span className={`badge ${result.disp.type==='died'?'died':'sold'}`}>{result.disp.whatHappened||result.disp.type}</span></div>
+                    {result.disp.buyer&&<div><span>Buyer: </span>{result.disp.buyer}</div>}
+                    {result.disp.cause&&<div><span>Cause: </span>{result.disp.cause}</div>}
+                  </div>
+                </>
+              )}
+              {result.meds?.length>0&&(
+                <>
+                  <div className="eid-section-label purple">Medical ({result.meds.length})</div>
+                  {[...result.meds].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4).map(m=>(
+                    <div key={m.id} className="eid-hist-row"><span><strong>{m.product}</strong> {m.dosage&&`${m.dosage} ${m.unit||''}`} {m.comment&&`· ${m.comment}`}</span><span style={{color:'#9ca3af',whiteSpace:'nowrap'}}>{m.date}</span></div>
+                  ))}
+                </>
+              )}
+            </>
+          ):(
+            <>
+              <div className="eid-result-head">
+                <div style={{fontWeight:600,color:'#92400e'}}>Tag <span className="mono">{result.tag}</span> not found</div>
+                <div className="eid-actions">
+                  <button className="btn btn-primary btn-sm" onClick={()=>{onPrefill('birth',result.tag);clear();}}><Plus/> Register lamb</button>
+                  <button className="btn btn-amber btn-sm" onClick={()=>onMedModal(result.tag)}><SyringeIco/> Add med</button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Sale Group Tab ─────────────────────────────────────
+function SaleGroupTab({ lambs, saleGroups, onSave, onDelete }) {
+  const [groupName, setGroupName] = useState('');
+  const [saleDate, setSaleDate]   = useState(today());
+  const [buyer, setBuyer]         = useState('');
+  const [venue, setVenue]         = useState('sale barn');
+  const [animals, setAnimals]     = useState([]);
+  const [scanVal, setScanVal]     = useState('');
+  const [browseSearch, setBrowseSearch] = useState('');
+  const [showBrowse, setShowBrowse] = useState(false);
+  const [weightMode, setWeightMode] = useState('total');
+  const [totalWeight, setTotalWeight] = useState('');
+  const [pricePerLb, setPricePerLb] = useState('');
+  const [totalPrice, setTotalPrice] = useState('');
+  const [comments, setComments]   = useState('');
+  const [expandedGroup, setExpandedGroup] = useState(null);
+  const [saving, setSaving]       = useState(false);
+  const scanRef = useRef(null);
+
+  const totalWt = weightMode==='total'?(parseFloat(totalWeight)||0):animals.reduce((s,a)=>s+(parseFloat(a.saleWeight)||parseFloat(a.birthWeight)||0),0);
+  const avgWt   = animals.length?(totalWt/animals.length):0;
+  const totPrc  = parseFloat(totalPrice)||0;
+  const pplb    = parseFloat(pricePerLb)||0;
+  const avgPrc  = animals.length?totPrc/animals.length:0;
+
+  const handlePPLB = v => { setPricePerLb(v); if(totalWt>0&&v) setTotalPrice((parseFloat(v)*totalWt).toFixed(2)); };
+  const handleTotP = v => { setTotalPrice(v); if(totalWt>0&&v) setPricePerLb((parseFloat(v)/totalWt).toFixed(4)); };
+  useEffect(()=>{ if(pricePerLb&&totalWt>0) setTotalPrice((parseFloat(pricePerLb)*totalWt).toFixed(2)); },[totalWt]);
+
+  const addByTag = () => {
+    const tag=scanVal.trim(); if(!tag) return;
+    if(animals.find(a=>String(a.tagNumber).toLowerCase()===tag.toLowerCase())){alert('Already in group');setScanVal('');return;}
+    const lamb=lambs.find(l=>String(l.tagNumber).toLowerCase()===tag.toLowerCase()||String(l.tag2||'').toLowerCase()===tag.toLowerCase());
+    if(lamb) setAnimals(p=>[...p,{...lamb,saleWeight:''}]);
+    else if(confirm('Tag '+tag+' not in records. Add anyway?')) setAnimals(p=>[...p,{id:'unk-'+Date.now(),tagNumber:tag,tag2:'',sex:'',birthWeight:'',saleWeight:''}]);
+    setScanVal(''); scanRef.current?.focus();
+  };
+
+  const toggle = a => { if(animals.find(x=>x.id===a.id)) setAnimals(p=>p.filter(x=>x.id!==a.id)); else setAnimals(p=>[...p,{...a,saleWeight:''}]); };
+
+  const saveGroup = async () => {
+    if(!groupName.trim()){alert('Group name required');return;}
+    if(!animals.length){alert('Add at least one animal');return;}
+    setSaving(true);
+    const g = { id:uid(), name:groupName, saleDate, buyer, venue, animals:animals.map(a=>({id:a.id,tagNumber:a.tagNumber,tag2:a.tag2,sex:a.sex,birthWeight:a.birthWeight,saleWeight:a.saleWeight})), weightMode, totalWeight:totalWt, avgWeight:avgWt, pricePerLb:pplb, totalPrice:totPrc, avgPrice:avgPrc, comments, recorded:new Date().toISOString() };
+    await onSave(g);
+    setSaving(false);
+    setGroupName(''); setAnimals([]); setTotalWeight(''); setPricePerLb(''); setTotalPrice(''); setComments('');
+  };
+
+  const fmt = n=>isNaN(n)||n===0?'—':'$'+n.toFixed(2);
+  const fmtW = n=>isNaN(n)||n===0?'—':n.toFixed(1)+' lbs';
+
+  const browsable = lambs.filter(l=>{ if(!browseSearch.trim()) return true; const s=browseSearch.toLowerCase(); return String(l.tagNumber).toLowerCase().includes(s)||String(l.tag2||'').toLowerCase().includes(s)||String(l.sex||'').toLowerCase().includes(s); });
+
+  return (
+    <>
+      <div className="card">
+        <div className="section-head">🐑 Build Sale Group</div>
+        <div className="form-grid" style={{marginBottom:'1rem'}}>
+          <div className="form-group"><label className="form-label">Group name *</label><input className="form-input" value={groupName} onChange={e=>setGroupName(e.target.value)} placeholder="e.g., Spring lambs lot 1"/></div>
+          <div className="form-group"><label className="form-label">Sale date</label><input type="date" className="form-input" value={saleDate} onChange={e=>setSaleDate(e.target.value)}/></div>
+          <div className="form-group"><label className="form-label">Venue</label><select className="form-select" value={venue} onChange={e=>setVenue(e.target.value)}><option value="sale barn">Sale barn</option><option value="private sale">Private sale</option><option value="other">Other</option></select></div>
+          <div className="form-group col3"><label className="form-label">Buyer</label><input className="form-input" value={buyer} onChange={e=>setBuyer(e.target.value)} placeholder="Buyer name or market"/></div>
+        </div>
+
+        <div style={{borderTop:'1px solid #f3f4f6',paddingTop:'1rem',marginBottom:'1rem'}}>
+          <div style={{fontWeight:600,fontSize:'.875rem',color:'#1f2937',marginBottom:'.5rem'}}>Add animals</div>
+          <div style={{display:'flex',gap:'.5rem',marginBottom:'.75rem',flexWrap:'wrap'}}>
+            <input ref={scanRef} className="form-input mono" style={{flex:1,minWidth:150}} value={scanVal} onChange={e=>setScanVal(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addByTag()} placeholder="Scan EID or type tag # + Enter" autoComplete="off"/>
+            <button className="btn btn-primary btn-sm" onClick={addByTag}>+ Add</button>
+            <button className={`btn btn-sm ${showBrowse?'btn-gray':'btn-outline'}`} onClick={()=>setShowBrowse(s=>!s)}>{showBrowse?'Hide':'Browse'} list</button>
+          </div>
+          {showBrowse&&(
+            <div style={{border:'1px solid #e5e7eb',borderRadius:'.375rem',marginBottom:'.75rem',overflow:'hidden'}}>
+              <div style={{padding:'.5rem .75rem',background:'#f9fafb',borderBottom:'1px solid #e5e7eb'}}>
+                <input className="search-input" style={{width:'100%'}} value={browseSearch} onChange={e=>setBrowseSearch(e.target.value)} placeholder="Filter animals..."/>
+              </div>
+              <div style={{maxHeight:200,overflowY:'auto'}}>
+                {browsable.map(l=>{
+                  const inG=!!animals.find(a=>a.id===l.id);
+                  return (<div key={l.id} className="animal-pick-row" onClick={()=>toggle(l)}>
+                    <input type="checkbox" checked={inG} onChange={()=>toggle(l)} onClick={e=>e.stopPropagation()}/>
+                    <span className="mono" style={{fontWeight:600,minWidth:70}}>{l.tagNumber}</span>
+                    {l.tag2&&<span className="mono" style={{color:'#6b7280',fontSize:'.75rem'}}>{l.tag2}</span>}
+                    <span className={`badge ${l.sex==='male'||l.sex==='ram'?'male':'female'}`}>{l.sex}</span>
+                    <span style={{fontSize:'.8rem',color:'#4b5563'}}>{l.birthWeight?l.birthWeight+' lbs birth':''}</span>
+                  </div>);
+                })}
+              </div>
+            </div>
+          )}
+          {animals.length>0&&(
+            <>
+              <div style={{fontSize:'.75rem',fontWeight:600,color:'#6b7280',marginBottom:'.4rem'}}>GROUP ({animals.length} animals)</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:'.75rem'}}>
+                {animals.map(a=><span key={a.id} className="group-animal-chip">{a.tagNumber}<button onClick={()=>setAnimals(p=>p.filter(x=>x.id!==a.id))}>×</button></span>)}
+              </div>
+              {weightMode==='individual'&&(
+                <div style={{border:'1px solid #e5e7eb',borderRadius:'.375rem',overflow:'hidden',marginBottom:'.5rem'}}>
+                  <div style={{background:'#f9fafb',padding:'6px 10px',fontSize:'.75rem',fontWeight:600,color:'#374151',borderBottom:'1px solid #e5e7eb'}}>Sale weights per animal (lbs)</div>
+                  {animals.map(a=>(
+                    <div key={a.id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 10px',borderBottom:'1px solid #f3f4f6'}}>
+                      <span className="mono" style={{minWidth:80,fontWeight:500}}>{a.tagNumber}</span>
+                      <span style={{fontSize:'.75rem',color:'#9ca3af',flex:1}}>birth: {a.birthWeight||'?'} lbs</span>
+                      <input type="number" step="0.1" className="form-input" style={{width:90}} value={a.saleWeight} onChange={e=>setAnimals(p=>p.map(x=>x.id===a.id?{...x,saleWeight:e.target.value}:x))} placeholder="lbs"/>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div style={{borderTop:'1px solid #f3f4f6',paddingTop:'1rem'}}>
+          <div style={{fontWeight:600,fontSize:'.875rem',color:'#1f2937',marginBottom:'.75rem'}}>Weight & Price</div>
+          <div style={{display:'flex',gap:'.5rem',marginBottom:'.875rem',flexWrap:'wrap'}}>
+            <label style={{fontSize:'.8rem',fontWeight:500,color:'#374151',alignSelf:'center'}}>Weight:</label>
+            {['total','individual'].map(m=><button key={m} className={`btn btn-sm ${weightMode===m?'btn-primary':'btn-outline'}`} onClick={()=>setWeightMode(m)}>{m==='total'?'Total group':'Per animal'}</button>)}
+          </div>
+          <div className="price-calc">
+            <div className="price-calc-grid">
+              {weightMode==='total'?(
+                <div className="form-group"><label className="form-label">Total group weight (lbs)</label><input type="number" step="0.1" className="form-input" value={totalWeight} onChange={e=>{setTotalWeight(e.target.value);if(pricePerLb&&e.target.value)setTotalPrice((parseFloat(pricePerLb)*parseFloat(e.target.value)).toFixed(2));}} placeholder="e.g., 420"/></div>
+              ):(
+                <div className="form-group"><label className="form-label">Total weight (auto)</label><input className="form-input" value={totalWt>0?totalWt.toFixed(1):''} readOnly style={{background:'#f9fafb',color:'#6b7280'}}/></div>
+              )}
+              <div className="form-group"><label className="form-label">Avg weight / animal</label><input className="form-input" value={avgWt>0?avgWt.toFixed(1)+' lbs':''} readOnly style={{background:'#f9fafb',color:'#6b7280'}}/></div>
+              <div className="form-group"><label className="form-label">Price per lb ($/lb)</label><input type="number" step="0.0001" className="form-input" value={pricePerLb} onChange={e=>handlePPLB(e.target.value)} placeholder="e.g., 1.85"/></div>
+              <div className="form-group"><label className="form-label">Total sale price ($)</label><input type="number" step="0.01" className="form-input" value={totalPrice} onChange={e=>handleTotP(e.target.value)} placeholder="e.g., 1200.00"/></div>
+            </div>
+            {(totalWt>0||totPrc>0)&&(
+              <div className="sale-summary" style={{marginTop:'.875rem',marginBottom:0}}>
+                <div className="sale-stat"><div className="sale-stat-val">{animals.length}</div><div className="sale-stat-label">Head</div></div>
+                <div className="sale-stat"><div className="sale-stat-val">{fmtW(totalWt)}</div><div className="sale-stat-label">Total wt</div></div>
+                <div className="sale-stat"><div className="sale-stat-val">{fmtW(avgWt)}</div><div className="sale-stat-label">Avg wt/head</div></div>
+                <div className="sale-stat highlight"><div className="sale-stat-val">{fmt(totPrc)}</div><div className="sale-stat-label">Total sale</div></div>
+                <div className="sale-stat highlight"><div className="sale-stat-val">{pplb>0?'$'+pplb.toFixed(4)+'/lb':'—'}</div><div className="sale-stat-label">$/lb</div></div>
+                <div className="sale-stat highlight"><div className="sale-stat-val">{fmt(avgPrc)}</div><div className="sale-stat-label">Avg $/head</div></div>
+              </div>
+            )}
+          </div>
+          <div className="form-group" style={{marginTop:'.75rem'}}><label className="form-label">Comments</label><textarea className="form-textarea" rows="2" value={comments} onChange={e=>setComments(e.target.value)}/></div>
+          <div style={{display:'flex',gap:'.75rem',marginTop:'.875rem',flexWrap:'wrap'}}>
+            <button className="btn btn-primary" onClick={saveGroup} disabled={saving}>💾 {saving?'Saving...':'Save Sale Group'}</button>
+            <button className="btn btn-outline" onClick={()=>{setGroupName('');setAnimals([]);setTotalWeight('');setPricePerLb('');setTotalPrice('');setComments('');}}>Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div style={{fontWeight:600,color:'#1f2937',marginBottom:'.875rem'}}>Saved Sale Groups ({saleGroups.length})</div>
+        {saleGroups.length===0?<div className="empty">No sale groups yet.</div>:(
+          [...saleGroups].sort((a,b)=>b.saleDate.localeCompare(a.saleDate)).map(g=>(
+            <div key={g.id} className="saved-group-card">
+              <div className="saved-group-header" onClick={()=>setExpandedGroup(expandedGroup===g.id?null:g.id)}>
+                <div><div style={{fontWeight:600}}>{g.name}</div><div style={{fontSize:'.8rem',color:'#6b7280'}}>{fmtDate(g.saleDate)} · {g.venue}{g.buyer?' · '+g.buyer:''}</div></div>
+                <div style={{display:'flex',gap:'1rem',alignItems:'center'}}>
+                  <div style={{textAlign:'right'}}><div style={{fontWeight:700,color:'#15803d'}}>{g.totalPrice>0?'$'+g.totalPrice.toFixed(2):'—'}</div><div style={{fontSize:'.75rem',color:'#6b7280'}}>{g.animals.length} head{g.totalWeight>0?' · '+g.totalWeight.toFixed(1)+' lbs':''}</div></div>
+                  <div style={{display:'flex',gap:4}}>
+                    <button className="btn-icon" onClick={e=>{e.stopPropagation();if(confirm('Delete?'))onDelete(g.id);}}><Trash/></button>
+                    <span style={{fontSize:'.75rem',color:'#9ca3af'}}>{expandedGroup===g.id?'▲':'▼'}</span>
+                  </div>
+                </div>
+              </div>
+              {expandedGroup===g.id&&(
+                <div className="saved-group-body">
+                  <div className="saved-group-stats">
+                    <div><span>Head: </span><strong>{g.animals.length}</strong></div>
+                    <div><span>Total wt: </span><strong>{g.totalWeight>0?g.totalWeight.toFixed(1)+' lbs':'—'}</strong></div>
+                    <div><span>Avg wt: </span><strong>{g.avgWeight>0?g.avgWeight.toFixed(1)+' lbs':'—'}</strong></div>
+                    <div><span>$/lb: </span><strong>{g.pricePerLb>0?'$'+g.pricePerLb.toFixed(4):'—'}</strong></div>
+                    <div><span>Total: </span><strong>{g.totalPrice>0?'$'+g.totalPrice.toFixed(2):'—'}</strong></div>
+                    <div><span>Avg $/head: </span><strong>{g.avgPrice>0?'$'+g.avgPrice.toFixed(2):'—'}</strong></div>
+                  </div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:5,marginBottom:'.5rem'}}>
+                    {g.animals.map(a=><span key={a.id} className="group-animal-chip" style={{cursor:'default'}}>{a.tagNumber}{a.saleWeight?<span style={{color:'#15803d',marginLeft:3}}>{a.saleWeight}lbs</span>:''}</span>)}
+                  </div>
+                  {g.comments&&<div style={{fontSize:'.8rem',color:'#6b7280'}}>{g.comments}</div>}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </>
+  );
+}
+
+// ── Breeding Tab ───────────────────────────────────────
+function BreedingTab({ lambs, breedingGroups, cidrEvents, onSaveGroup, onDeleteGroup, onSaveCidr, onDeleteCidr }) {
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showCidrModal, setShowCidrModal]   = useState(false);
+  const [editGroup, setEditGroup]           = useState(null);
+  const [editCidr, setEditCidr]             = useState(null);
+  const [expanded, setExpanded]             = useState(null);
+
+  return (
+    <>
+      {showGroupModal&&<BreedingGroupModal group={editGroup} lambs={lambs} onClose={()=>{setShowGroupModal(false);setEditGroup(null);}} onSave={async g=>{await onSaveGroup(g);setShowGroupModal(false);setEditGroup(null);}}/>}
+      {showCidrModal&&<CidrModal event={editCidr} lambs={lambs} breedingGroups={breedingGroups} onClose={()=>{setShowCidrModal(false);setEditCidr(null);}} onSave={async e=>{await onSaveCidr(e);setShowCidrModal(false);setEditCidr(null);}}/>}
+
+      {/* Breeding Groups */}
+      <div className="card">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.875rem',flexWrap:'wrap',gap:'.5rem'}}>
+          <div className="section-head" style={{margin:0}}><HeartIco/> Breeding Groups</div>
+          <button className="btn btn-primary btn-sm" onClick={()=>setShowGroupModal(true)}><Plus/> New group</button>
+        </div>
+
+        {breedingGroups.length===0?<div className="empty">No breeding groups yet. Create one to track ram in/out dates and which ewes are in each group.</div>:(
+          breedingGroups.map(g=>{
+            const isActive = g.ramInDate && (!g.ramOutDate || new Date(g.ramOutDate) >= new Date());
+            return (
+              <div key={g.id} className="breeding-card">
+                <div className="breeding-card-head" onClick={()=>setExpanded(expanded===g.id?null:g.id)}>
+                  <div>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      <span style={{fontWeight:600}}>{g.name}</span>
+                      <span className={`badge ${isActive?'active':'complete'}`}>{isActive?'Active':'Complete'}</span>
+                    </div>
+                    <div style={{fontSize:'.8rem',color:'#6b7280',marginTop:2}}>
+                      {g.ramName&&<span>{g.ramName} </span>}
+                      {g.ramBreed&&<span>({g.ramBreed}) </span>}
+                      {g.ramTag&&<span className="mono">#{g.ramTag} </span>}
+                      · {g.ewes.length} ewes
+                    </div>
+                  </div>
+                  <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                    <div style={{textAlign:'right',fontSize:'.8rem',color:'#6b7280'}}>
+                      {g.ramInDate&&<div>In: {fmtDate(g.ramInDate)}</div>}
+                      {g.ramOutDate&&<div>Out: {fmtDate(g.ramOutDate)}</div>}
+                    </div>
+                    <div style={{display:'flex',gap:4}}>
+                      <button className="btn-icon blue" title="Edit" onClick={e=>{e.stopPropagation();setEditGroup(g);setShowGroupModal(true);}}><EditIco/></button>
+                      <button className="btn-icon" title="Delete" onClick={e=>{e.stopPropagation();if(confirm('Delete this breeding group?'))onDeleteGroup(g.id);}}><Trash/></button>
+                      <span style={{fontSize:'.75rem',color:'#9ca3af'}}>{expanded===g.id?'▲':'▼'}</span>
+                    </div>
+                  </div>
+                </div>
+                {expanded===g.id&&(
+                  <div className="breeding-card-body">
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'1rem',marginBottom:'.875rem'}}>
+                      <div><div style={{fontSize:'.75rem',color:'#6b7280'}}>Ram</div><div style={{fontWeight:500}}>{g.ramName||'—'} {g.ramBreed?`(${g.ramBreed})`:''}</div>{g.ramTag&&<div className="mono" style={{fontSize:'.8rem'}}>#{g.ramTag}</div>}</div>
+                      <div><div style={{fontSize:'.75rem',color:'#6b7280'}}>Dates</div><div style={{fontSize:'.875rem'}}>In: {fmtDate(g.ramInDate)}</div><div style={{fontSize:'.875rem'}}>Out: {g.ramOutDate?fmtDate(g.ramOutDate):'Still in'}</div></div>
+                    </div>
+                    {g.ewes.length>0&&(
+                      <>
+                        <div style={{fontSize:'.75rem',color:'#6b7280',marginBottom:'.35rem'}}>Ewes ({g.ewes.length})</div>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                          {g.ewes.map(t=><span key={t} className="group-animal-chip" style={{cursor:'default'}}>{t}</span>)}
+                        </div>
+                      </>
+                    )}
+                    {g.notes&&<div style={{fontSize:'.8rem',color:'#6b7280',marginTop:'.5rem'}}>{g.notes}</div>}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* CIDR Events */}
+      <div className="card">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.875rem',flexWrap:'wrap',gap:'.5rem'}}>
+          <div className="section-head" style={{margin:0}}>🟡 CIDR Events</div>
+          <button className="btn btn-amber btn-sm" onClick={()=>setShowCidrModal(true)}><Plus/> New CIDR event</button>
+        </div>
+
+        {cidrEvents.length===0?<div className="empty">No CIDR events recorded yet.</div>:(
+          [...cidrEvents].sort((a,b)=>b.dateIn.localeCompare(a.dateIn)).map(e=>{
+            const group = breedingGroups.find(g=>g.id===e.breedingGroupId);
+            const cidrsOut = !!e.dateOut && new Date(e.dateOut) < new Date();
+            return (
+              <div key={e.id} className="cidr-card">
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:'.5rem'}}>
+                  <div>
+                    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+                      <span className={`badge ${cidrsOut?'complete':'cidr'}`}>{cidrsOut?'CIDRs out':'CIDRs in'}</span>
+                      {group&&<span style={{fontSize:'.8rem',color:'#6b7280'}}>{group.name}</span>}
+                    </div>
+                    <div style={{fontSize:'.875rem',color:'#374151'}}>
+                      <span>In: <strong>{fmtDate(e.dateIn)}</strong></span>
+                      {e.dateOut&&<span style={{marginLeft:12}}>Out: <strong>{fmtDate(e.dateOut)}</strong></span>}
+                    </div>
+                    <div style={{fontSize:'.8rem',color:'#6b7280',marginTop:2}}>{e.ewes.length} ewes</div>
+                    {e.notes&&<div style={{fontSize:'.8rem',color:'#6b7280'}}>{e.notes}</div>}
+                    {e.ewes.length>0&&(
+                      <div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:'.4rem'}}>
+                        {e.ewes.map(t=><span key={t} className="group-animal-chip" style={{cursor:'default',fontSize:'.75rem'}}>{t}</span>)}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{display:'flex',gap:4}}>
+                    <button className="btn-icon blue" title="Edit" onClick={()=>{setEditCidr(e);setShowCidrModal(true);}}><EditIco/></button>
+                    <button className="btn-icon" title="Delete" onClick={()=>{if(confirm('Delete this CIDR event?'))onDeleteCidr(e.id);}}><Trash/></button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </>
+  );
+}
+
+// ── Export Tab ─────────────────────────────────────────
+function ExportTab({ counts, onExport }) {
+  const datasets = [
+    { key:'births',        label:'Birth Records',   emoji:'🐑', desc:'Tag #, birth date, sex, weight, ewe, multiples, complications' },
+    { key:'disposals',     label:'Deaths / Sales',  emoji:'💀', desc:'Tag #, date, what happened, cause/buyer, weight' },
+    { key:'meds',          label:'Medications',     emoji:'💉', desc:'Tag #, date, product, dosage, unit, comment' },
+    { key:'feed',          label:'Feed Log',        emoji:'🌿', desc:'Date, who, feed type, quantity, unit' },
+    { key:'saleGroups',    label:'Sale Groups',     emoji:'💰', desc:'Group name, date, venue, buyer, head, weights, prices' },
+    { key:'breedingGroups',label:'Breeding Groups', emoji:'❤️', desc:'Group name, ram details, in/out dates, ewes' },
+    { key:'cidrEvents',    label:'CIDR Events',     emoji:'🟡', desc:'Date in/out, ewes, linked breeding group' },
+    { key:'retagLog',      label:'Re-tag Log',      emoji:'🏷️', desc:'Date, old tag, new tag, reason' },
+  ];
+  const total = Object.values(counts).reduce((s,v)=>s+v,0);
+  return (
+    <>
+      <div className="card">
+        <div className="section-head">📤 Export Data</div>
+        <p style={{fontSize:'.875rem',color:'#4b5563',marginBottom:'1.25rem'}}>Download records as CSV files to open in Excel or Google Sheets. Data is stored in Supabase — this is an additional backup option.</p>
+        <div style={{background:'#f0fdf4',border:'2px solid #16a34a',borderRadius:'.5rem',padding:'1.25rem',marginBottom:'1.25rem',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:'1rem'}}>
+          <div>
+            <div style={{fontWeight:700,color:'#065f46'}}>📦 Full export — all data</div>
+            <div style={{fontSize:'.8rem',color:'#4b5563',marginTop:2}}>{total} total records in one CSV</div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>onExport('all')} disabled={total===0}><DL/> Download full export</button>
+        </div>
+      </div>
+      <div className="card">
+        <div style={{fontWeight:600,color:'#1f2937',marginBottom:'1rem'}}>Export by dataset</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr',gap:'.75rem'}}>
+          {datasets.map(d=>(
+            <div key={d.key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'.875rem 1rem',border:'1px solid #e5e7eb',borderRadius:'.5rem',flexWrap:'wrap',gap:'.5rem'}}>
+              <div style={{display:'flex',alignItems:'center',gap:'.75rem'}}>
+                <span style={{fontSize:'1.25rem'}}>{d.emoji}</span>
+                <div>
+                  <div style={{fontWeight:600,fontSize:'.9rem',color:'#1f2937'}}>{d.label}</div>
+                  <div style={{fontSize:'.75rem',color:'#6b7280'}}>{counts[d.key]||0} records · {d.desc}</div>
+                </div>
+              </div>
+              <button className="btn btn-blue btn-sm" onClick={()=>onExport(d.key)} disabled={!counts[d.key]}><DL/> CSV</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Re-tag Tab ─────────────────────────────────────────
+function RetagTab({ lambs, retagLog, onRetag }) {
+  const [search, setSearch] = useState('');
+  const filtered = lambs.filter(l=>{ if(!search.trim()) return true; const s=search.toLowerCase(); return String(l.tagNumber).toLowerCase().includes(s)||String(l.tag2||'').toLowerCase().includes(s)||String(l.eweNumber||'').toLowerCase().includes(s)||String(l.sex||'').toLowerCase().includes(s); });
+  return (
+    <>
+      <div className="card">
+        <div className="section-head"><TagIco/> Re-tag an Animal</div>
+        <p style={{fontSize:'.875rem',color:'#4b5563',marginBottom:'.875rem'}}>Search below to find the animal, then click Re-tag. All records update automatically.</p>
+        <div style={{display:'flex',gap:'.75rem',marginBottom:'.875rem',alignItems:'center',flexWrap:'wrap'}}>
+          <div className="search-wrap" style={{flex:1,minWidth:200}}>
+            <div className="search-ico"><SearchIco/></div>
+            <input className="search-input" style={{width:'100%',paddingLeft:'2rem'}} value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search tag #, alt tag, ewe #, sex..." autoComplete="off"/>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={()=>onRetag('')}><TagIco/> Browse all</button>
+        </div>
+        <div style={{fontSize:'.75rem',color:'#6b7280',marginBottom:'.5rem'}}>{filtered.length} of {lambs.length} animals</div>
+        {filtered.length===0?<div className="empty">{lambs.length===0?'No animals yet.':'No matches.'}</div>:(
+          <div className="tbl-wrap">
+            <table>
+              <thead><tr><th>Tag #</th><th>Alt Tag</th><th>Sex</th><th>Birth Date</th><th>Ewe</th><th>Type</th><th>Re-tag history</th><th></th></tr></thead>
+              <tbody>
+                {filtered.map(l=>(
+                  <tr key={l.id}>
+                    <td className="mono" style={{fontWeight:600}}>{l.tagNumber}</td>
+                    <td className="mono" style={{color:'#6b7280'}}>{l.tag2||'—'}</td>
+                    <td><span className={`badge ${l.sex==='male'||l.sex==='ram'?'male':'female'}`}>{l.sex}</span></td>
+                    <td>{fmtDate(l.birthDate)}</td>
+                    <td className="mono">{l.eweNumber}</td>
+                    <td style={{textTransform:'capitalize'}}>{l.numberBorn}</td>
+                    <td style={{fontSize:'.75rem',color:'#6b7280',fontFamily:'monospace'}}>{l.retagHistory?.length>0?l.retagHistory.map(r=>`${r.oldTag}→${r.newTag}`).join(', '):'—'}</td>
+                    <td><button className="btn btn-gray btn-sm" onClick={()=>onRetag(l.tagNumber)}><TagIco/> Re-tag</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      <div className="card">
+        <div style={{fontWeight:600,color:'#1f2937',marginBottom:'.875rem'}}>Re-tag History ({retagLog.length})</div>
+        {retagLog.length===0?<div className="empty">No re-tag events yet.</div>:(
+          <div className="tbl-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Old Tag</th><th>New Tag</th><th>Alt Tag</th><th>Reason</th></tr></thead>
+              <tbody>
+                {[...retagLog].sort((a,b)=>b.date.localeCompare(a.date)).map(r=>(
+                  <tr key={r.id}>
+                    <td>{fmtDate(r.date)}</td>
+                    <td className="mono">{r.oldTag}</td>
+                    <td className="mono" style={{fontWeight:600}}>{r.newTag}</td>
+                    <td className="mono" style={{color:'#6b7280'}}>{r.newTag2||'—'}</td>
+                    <td>{r.reason||'—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ── Main App ───────────────────────────────────────────
+function App() {
+  const [lambs, setLambs]                   = useState([]);
+  const [disposals, setDisposals]           = useState([]);
+  const [medEvents, setMedEvents]           = useState([]);
+  const [feedLogs, setFeedLogs]             = useState([]);
+  const [saleGroups, setSaleGroups]         = useState([]);
+  const [retagLog, setRetagLog]             = useState([]);
+  const [breedingGroups, setBreedingGroups] = useState([]);
+  const [cidrEvents, setCidrEvents]         = useState([]);
+  const [loading, setLoading]               = useState(true);
+  const [loadErr, setLoadErr]               = useState(null);
+  const [activeTab, setActiveTab]           = useState('birth');
+  const [search, setSearch]                 = useState('');
+  const [saveStatus, setSaveStatus]         = useState(''); // message
+  const [medModal, setMedModal]             = useState(null);
+  const [retagModal, setRetagModal]         = useState(null);
+  const [prefillBirth, setPrefillBirth]     = useState('');
+  const [prefillDisposal, setPrefillDisposal] = useState('');
+
+  // Birth form
+  const emptyBirth = { tagNumber:'', tag2:'', birthDate:today(), sex:'male', birthWeight:'', eweNumber:'', numberBorn:'single', complications:'', comments:'' };
+  const [birthForm, setBirth] = useState(emptyBirth);
+
+  // Disposal form
+  const emptyDisp = { date:today(), tagNumber:'', whatHappened:'', weight:'', buyer:'', cause:'', comments:'' };
+  const [dispForm, setDisp] = useState(emptyDisp);
+
+  // Feed form
+  const emptyFeed = { date:today(), who:'Ewes', whatIsIt:'', quantity:'', unit:'Pounds', comments:'' };
+  const [feedForm, setFeed] = useState(emptyFeed);
+
+  useEffect(() => { loadAll(); }, []);
+  useEffect(() => { if(prefillBirth){setBirth(f=>({...f,tagNumber:prefillBirth}));setPrefillBirth('');} }, [prefillBirth,activeTab]);
+  useEffect(() => { if(prefillDisposal){setDisp(f=>({...f,tagNumber:prefillDisposal}));setPrefillDisposal('');} }, [prefillDisposal,activeTab]);
+
+  const loadAll = async () => {
+    setLoading(true); setLoadErr(null);
+    try {
+      const [b,d,m,f,sg,rl,bg,ce] = await Promise.all([
+        sb(TABLE.births,'GET',null,'?order=date_added.desc'),
+        sb(TABLE.disposals,'GET',null,'?order=date.desc'),
+        sb(TABLE.meds,'GET',null,'?order=date.desc'),
+        sb(TABLE.feed,'GET',null,'?order=date.desc'),
+        sb(TABLE.saleGroups,'GET',null,'?order=sale_date.desc'),
+        sb(TABLE.retagLog,'GET',null,'?order=date.desc'),
+        sb(TABLE.breedingGroups,'GET',null,'?order=recorded.desc'),
+        sb(TABLE.cidrEvents,'GET',null,'?order=date_in.desc'),
+      ]);
+      setLambs(b.map(fromDb.births));
+      setDisposals(d.map(fromDb.disposals));
+      setMedEvents(m.map(fromDb.meds));
+      setFeedLogs(f.map(fromDb.feed));
+      setSaleGroups(sg.map(fromDb.saleGroups));
+      setRetagLog(rl.map(fromDb.retagLog));
+      setBreedingGroups(bg.map(fromDb.breedingGroups));
+      setCidrEvents(ce.map(fromDb.cidrEvents));
+    } catch(e) {
+      setLoadErr('Failed to load data: '+e.message+'. Check that you have run the SQL setup in Supabase.');
+    }
+    setLoading(false);
+  };
+
+  const flash = msg => { setSaveStatus(msg); setTimeout(()=>setSaveStatus(''),3000); };
+
+  // ── CRUD helpers ──
+  const upsert = async (table, dbKey, mapper, item, setter) => {
+    await sb(TABLE[table],'POST',[mapper(item)],'');
+    setter(prev => { const exists=prev.find(x=>x.id===item.id); return exists?prev.map(x=>x.id===item.id?item:x):[item,...prev]; });
+    flash('Saved ✓');
+  };
+  const del = async (table, id, setter) => {
+    await sb(TABLE[table],'DELETE',null,`?id=eq.${id}`);
+    setter(prev=>prev.filter(x=>x.id!==id));
+    flash('Deleted');
+  };
+
+  const saveLamb    = item => upsert('births','births',toDb.births,item,setLambs);
+  const saveDisp    = item => upsert('disposals','disposals',toDb.disposals,item,setDisposals);
+  const saveMed     = item => upsert('meds','meds',toDb.meds,item,setMedEvents);
+  const saveFeedRec = item => upsert('feed','feed',toDb.feed,item,setFeedLogs);
+  const saveSaleGrp = item => upsert('saleGroups','saleGroups',toDb.saleGroups,item,setSaleGroups);
+  const saveRetag   = item => upsert('retagLog','retagLog',toDb.retagLog,item,setRetagLog);
+  const saveBreedGrp = item => upsert('breedingGroups','breedingGroups',toDb.breedingGroups,item,setBreedingGroups);
+  const saveCidr    = item => upsert('cidrEvents','cidrEvents',toDb.cidrEvents,item,setCidrEvents);
+
+  const delLamb     = id => del('births',id,setLambs);
+  const delDisp     = id => del('disposals',id,setDisposals);
+  const delMed      = id => del('meds',id,setMedEvents);
+  const delFeed     = id => del('feed',id,setFeedLogs);
+  const delSaleGrp  = id => del('saleGroups',id,setSaleGroups);
+  const delBreedGrp = id => del('breedingGroups',id,setBreedingGroups);
+  const delCidr     = id => del('cidrEvents',id,setCidrEvents);
+
+  // ── Submit handlers ──
+  const submitBirth = async e => {
+    e.preventDefault();
+    if(!birthForm.tagNumber||!birthForm.birthWeight||!birthForm.eweNumber){alert('Tag #, weight, and ewe # required');return;}
+    await saveLamb({id:uid(),...birthForm,birthWeight:parseFloat(birthForm.birthWeight),dateAdded:new Date().toISOString()});
+    setBirth(emptyBirth);
+  };
+
+  const submitDisp = async e => {
+    e.preventDefault();
+    if(!dispForm.tagNumber||!dispForm.whatHappened){alert('Tag # and what happened required');return;}
+    const isDied=dispForm.whatHappened==='Died', isSold=dispForm.whatHappened.startsWith('Sold');
+    if(isDied&&!dispForm.cause){alert('Cause of death required');return;}
+    if(isSold&&!dispForm.buyer){alert('Buyer required');return;}
+    await saveDisp({id:uid(),...dispForm,type:isDied?'died':'sold',weight:dispForm.weight?parseFloat(dispForm.weight):null,dateRecorded:new Date().toISOString()});
+    setDisp(emptyDisp);
+  };
+
+  const submitFeed = async e => {
+    e.preventDefault();
+    if(!feedForm.whatIsIt||!feedForm.quantity){alert('Feed type and quantity required');return;}
+    await saveFeedRec({id:uid(),...feedForm,recorded:new Date().toISOString()});
+    setFeed(emptyFeed);
+  };
+
+  const applyRetag = async ({ oldTag, newTag, newTag2, reason, animalId }) => {
+    // Update lamb record
+    const lamb = lambs.find(l=>l.id===animalId);
+    if(lamb){
+      const history=[...(lamb.retagHistory||[]),{oldTag,newTag,date:today(),reason}];
+      const updated={...lamb,tagNumber:newTag,tag2:newTag2||lamb.tag2||'',retagHistory:history};
+      await saveLamb(updated);
+    }
+    // Update meds + disposals with old tag
+    await Promise.all([
+      ...medEvents.filter(m=>String(m.tagNumber).toLowerCase()===oldTag.toLowerCase()).map(m=>saveMed({...m,tagNumber:newTag})),
+      ...disposals.filter(d=>String(d.tagNumber).toLowerCase()===oldTag.toLowerCase()).map(d=>saveDisp({...d,tagNumber:newTag})),
+    ]);
+    await saveRetag({id:uid(),oldTag,newTag,newTag2,reason,date:today(),recorded:new Date().toISOString()});
+  };
+
+  // ── CSV Export ──
+  const csvRow = arr => arr.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',');
+  const dlCSV = (rows,name) => { const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.join('\n')); a.download=name; a.style.visibility='hidden'; document.body.appendChild(a); a.click(); document.body.removeChild(a); };
+
+  const doExport = key => {
+    if(key==='all'){
+      const parts=[];
+      parts.push('BARKA SHEEP TRACKER EXPORT — '+today(),'');
+      parts.push('--- BIRTHS ---');
+      parts.push(csvRow(['Tag #','Alt Tag','Birth Date','Sex','Birth Weight','Ewe #','Number Born','Complications','Comments']));
+      lambs.forEach(l=>parts.push(csvRow([l.tagNumber,l.tag2||'',fmtDate(l.birthDate),l.sex,l.birthWeight,l.eweNumber,l.numberBorn,l.complications||'',l.comments||''])));
+      parts.push('','--- DEATHS/SALES ---');
+      parts.push(csvRow(['Tag #','Date','What Happened','Cause','Buyer','Weight','Comments']));
+      disposals.forEach(d=>parts.push(csvRow([d.tagNumber,d.date,d.whatHappened||'',d.cause||'',d.buyer||'',d.weight||'',d.comments||''])));
+      parts.push('','--- MEDICATIONS ---');
+      parts.push(csvRow(['Tag #','Date','Product','Dosage','Unit','Comment']));
+      medEvents.forEach(m=>parts.push(csvRow([m.tagNumber,m.date,m.product,m.dosage||'',m.unit||'',m.comment||''])));
+      parts.push('','--- FEED ---');
+      parts.push(csvRow(['Date','Who','What','Quantity','Unit','Comments']));
+      feedLogs.forEach(f=>parts.push(csvRow([f.date,f.who,f.whatIsIt,f.quantity,f.unit,f.comments||''])));
+      parts.push('','--- SALE GROUPS ---');
+      parts.push(csvRow(['Name','Date','Venue','Buyer','Head','Total Wt','Avg Wt','$/lb','Total $','Avg $/Head']));
+      saleGroups.forEach(g=>parts.push(csvRow([g.name,g.saleDate,g.venue,g.buyer||'',g.animals.length,(g.totalWeight||0).toFixed(1),(g.avgWeight||0).toFixed(1),(g.pricePerLb||0).toFixed(4),(g.totalPrice||0).toFixed(2),(g.avgPrice||0).toFixed(2)])));
+      parts.push('','--- BREEDING GROUPS ---');
+      parts.push(csvRow(['Name','Ram Tag','Ram Name','Ram Breed','Ram In','Ram Out','Ewes','Notes']));
+      breedingGroups.forEach(g=>parts.push(csvRow([g.name,g.ramTag||'',g.ramName||'',g.ramBreed||'',fmtDate(g.ramInDate),g.ramOutDate?fmtDate(g.ramOutDate):'still in',g.ewes.join('; '),g.notes||''])));
+      parts.push('','--- CIDR EVENTS ---');
+      parts.push(csvRow(['Date In','Date Out','Ewes','Notes']));
+      cidrEvents.forEach(e=>parts.push(csvRow([fmtDate(e.dateIn),e.dateOut?fmtDate(e.dateOut):'not yet',e.ewes.join('; '),e.notes||''])));
+      parts.push('','--- RE-TAG LOG ---');
+      parts.push(csvRow(['Date','Old Tag','New Tag','Alt Tag','Reason']));
+      retagLog.forEach(r=>parts.push(csvRow([r.date,r.oldTag,r.newTag,r.newTag2||'',r.reason||''])));
+      dlCSV(parts,`barka-full-export-${today()}.csv`);
+      return;
+    }
+    const map = {
+      births: { data:lambs, hdr:['Tag #','Alt Tag','Birth Date','Sex','Birth Weight','Ewe #','Number Born','Complications','Comments'], row:l=>[l.tagNumber,l.tag2||'',fmtDate(l.birthDate),l.sex,l.birthWeight,l.eweNumber,l.numberBorn,l.complications||'',l.comments||''] },
+      disposals: { data:disposals, hdr:['Tag #','Date','What Happened','Cause','Buyer','Weight','Comments'], row:d=>[d.tagNumber,d.date,d.whatHappened||'',d.cause||'',d.buyer||'',d.weight||'',d.comments||''] },
+      meds: { data:medEvents, hdr:['Tag #','Date','Product','Dosage','Unit','Comment'], row:m=>[m.tagNumber,m.date,m.product,m.dosage||'',m.unit||'',m.comment||''] },
+      feed: { data:feedLogs, hdr:['Date','Who','What','Quantity','Unit','Comments'], row:f=>[f.date,f.who,f.whatIsIt,f.quantity,f.unit,f.comments||''] },
+      saleGroups: { data:saleGroups, hdr:['Name','Date','Venue','Buyer','Head','Total Wt','Avg Wt','$/lb','Total $','Avg $/Head','Animals'], row:g=>[g.name,g.saleDate,g.venue,g.buyer||'',g.animals.length,(g.totalWeight||0).toFixed(1),(g.avgWeight||0).toFixed(1),(g.pricePerLb||0).toFixed(4),(g.totalPrice||0).toFixed(2),(g.avgPrice||0).toFixed(2),g.animals.map(a=>a.tagNumber).join('; ')] },
+      breedingGroups: { data:breedingGroups, hdr:['Name','Ram Tag','Ram Name','Ram Breed','Ram In','Ram Out','Ewes','Notes'], row:g=>[g.name,g.ramTag||'',g.ramName||'',g.ramBreed||'',fmtDate(g.ramInDate),g.ramOutDate?fmtDate(g.ramOutDate):'still in',g.ewes.join('; '),g.notes||''] },
+      cidrEvents: { data:cidrEvents, hdr:['Date In','Date Out','Ewes','Notes'], row:e=>[fmtDate(e.dateIn),e.dateOut?fmtDate(e.dateOut):'not yet',e.ewes.join('; '),e.notes||''] },
+      retagLog: { data:retagLog, hdr:['Date','Old Tag','New Tag','Alt Tag','Reason'], row:r=>[r.date,r.oldTag,r.newTag,r.newTag2||'',r.reason||''] },
+    };
+    const def=map[key]; if(!def) return;
+    dlCSV([csvRow(def.hdr),...def.data.map(r=>csvRow(def.row(r)))],`barka-${key}-${today()}.csv`);
+  };
+
+  const filterTag = arr => arr.filter(r=>{ const s=search.toLowerCase(); return !search||String(r.tagNumber||'').toLowerCase().includes(s)||String(r.eweNumber||'').toLowerCase().includes(s)||String(r.tag2||'').toLowerCase().includes(s); });
+  const lambStats = { total:lambs.length, rams:lambs.filter(l=>l.sex==='male'||l.sex==='ram').length, ewes:lambs.filter(l=>l.sex==='female'||l.sex==='ewe').length, avg:lambs.length?(lambs.reduce((s,l)=>s+(+l.birthWeight||0),0)/lambs.length).toFixed(1):0 };
+
+  if(loading) return <div className="loading"><div className="loading-text">Loading from Supabase...</div></div>;
+  if(loadErr) return <div className="loading"><div style={{textAlign:'center',maxWidth:500,padding:'2rem'}}><div style={{color:'#dc2626',fontWeight:600,marginBottom:'.875rem'}}>Connection Error</div><div style={{color:'#4b5563',fontSize:'.875rem',marginBottom:'1rem'}}>{loadErr}</div><button className="btn btn-primary" onClick={loadAll}><Refresh/> Retry</button></div></div>;
+
+  return (
+    <div className="app-container">
+      {medModal!==null&&<MedModal tag={medModal} onClose={()=>setMedModal(null)} onSave={async e=>{await saveMed(e);setMedModal(null);}}/>}
+      {retagModal!==null&&<RetagModal tag={retagModal} lambs={lambs} onClose={()=>setRetagModal(null)} onSave={applyRetag}/>}
+
+      <div className="max-w">
+        <div className="card">
+          <div className="header-flex">
+            <div>
+              <div className="title">Barka Sheep Tracker</div>
+              <div className="subtitle">Powered by Supabase · jrbarka</div>
+            </div>
+            <div className="cloud-badge">
+              <div className="cloud-title">☁️ Supabase Database</div>
+              <div className="cloud-text">All data saves instantly to the cloud</div>
+              <div className="sync-row"><div className="dot"/><span className="sync-text">Live sync — no manual sync needed</span></div>
+              <button className="btn btn-cloud" style={{marginTop:'.5rem',width:'100%'}} onClick={loadAll}><Refresh/> Refresh data</button>
+            </div>
+          </div>
+
+          {saveStatus&&<div className="alert success" style={{marginTop:'.875rem'}}>{saveStatus}</div>}
+
+          <div className="tabs">
+            {[['birth','🐑 Births'],['disposal','💀 Deaths/Sales'],['meds','💉 Meds'],['feed','🌿 Feed'],['breeding','❤️ Breeding'],['sale','💰 Sale Groups'],['export','📤 Export'],['retag','🏷️ Re-tag']].map(([id,label])=>(
+              <button key={id} className={`tab ${activeTab===id?'active':''}`} onClick={()=>{setActiveTab(id);setSearch('');}}>{label}</button>
+            ))}
+          </div>
+
+          <EIDBar lambs={lambs} disposals={disposals} medEvents={medEvents}
+            onPrefill={(form,tag)=>{ if(form==='birth'){setActiveTab('birth');setPrefillBirth(tag);} if(form==='disposal'){setActiveTab('disposal');setPrefillDisposal(tag);} }}
+            onMedModal={tag=>setMedModal(tag)} onRetagModal={tag=>setRetagModal(tag)}/>
+
+          {activeTab==='birth'&&(
+            <div className="stats-grid">
+              <div className="stat green"><div className="stat-val green">{lambStats.total}</div><div className="stat-label">Total lambs</div></div>
+              <div className="stat blue"><div className="stat-val blue">{lambStats.rams}</div><div className="stat-label">Ram lambs</div></div>
+              <div className="stat pink"><div className="stat-val pink">{lambStats.ewes}</div><div className="stat-label">Ewe lambs</div></div>
+              <div className="stat amber"><div className="stat-val amber">{lambStats.avg}</div><div className="stat-label">Avg wt (lbs)</div></div>
+            </div>
+          )}
+        </div>
+
+        {/* ── BIRTH TAB ── */}
+        {activeTab==='birth'&&(
+          <>
+            <div className="card">
+              <div className="section-head"><Plus/> Add New Lamb</div>
+              <form onSubmit={submitBirth} className="form-grid">
+                <div className="form-group"><label className="form-label">Lamb Tag # *</label><input className={`form-input mono ${birthForm.tagNumber?'prefilled':''}`} value={birthForm.tagNumber} onChange={e=>setBirth({...birthForm,tagNumber:e.target.value})} placeholder="Scan EID or type tag #" required autoComplete="off"/><p className="form-hint">Auto-filled from EID scan above</p></div>
+                <div className="form-group"><label className="form-label">Alt / backup tag</label><input className="form-input mono" value={birthForm.tag2} onChange={e=>setBirth({...birthForm,tag2:e.target.value})} placeholder="Optional 2nd tag" autoComplete="off"/></div>
+                <div className="form-group"><label className="form-label">Birth Date *</label><input type="date" className="form-input" value={birthForm.birthDate} onChange={e=>setBirth({...birthForm,birthDate:e.target.value})} required/></div>
+                <div className="form-group"><label className="form-label">Sex *</label><select className="form-select" value={birthForm.sex} onChange={e=>setBirth({...birthForm,sex:e.target.value})}><option value="male">Male</option><option value="female">Female</option></select></div>
+                <div className="form-group"><label className="form-label">Birth Weight (lbs) *</label><input type="number" step="0.1" className="form-input" value={birthForm.birthWeight} onChange={e=>setBirth({...birthForm,birthWeight:e.target.value})} placeholder="e.g., 8.5" required/></div>
+                <div className="form-group"><label className="form-label">Ewe Number *</label><input className="form-input mono" value={birthForm.eweNumber} onChange={e=>setBirth({...birthForm,eweNumber:e.target.value})} placeholder="Dam's tag #" required autoComplete="off"/></div>
+                <div className="form-group"><label className="form-label">Multiples</label><select className="form-select" value={birthForm.numberBorn} onChange={e=>setBirth({...birthForm,numberBorn:e.target.value})}><option value="single">Single</option><option value="twin">Twin</option><option value="triple">Triple</option><option value="quad">Quad</option><option value="other">Other</option></select></div>
+                <div className="form-group"><label className="form-label">Complications</label><input className="form-input" value={birthForm.complications} onChange={e=>setBirth({...birthForm,complications:e.target.value})} placeholder="e.g., assisted, weak"/></div>
+                <div className="form-group col3"><label className="form-label">Comments</label><textarea className="form-textarea" rows="2" value={birthForm.comments} onChange={e=>setBirth({...birthForm,comments:e.target.value})} placeholder="e.g., bottle fed, rejected..."/></div>
+                <div className="col3" style={{display:'flex',gap:'.75rem',flexWrap:'wrap'}}>
+                  <button type="submit" className="btn btn-primary"><Plus/> Add Lamb</button>
+                  <button type="button" className="btn btn-outline" onClick={()=>setBirth(emptyBirth)}>Clear</button>
+                </div>
+              </form>
+            </div>
+            <div className="card">
+              <div className="toolbar">
+                <div style={{fontWeight:600,color:'#1f2937'}}>Lamb Records ({filterTag(lambs).length})</div>
+                <div style={{display:'flex',gap:'.5rem',flexWrap:'wrap',alignItems:'center'}}>
+                  <button className="btn btn-blue btn-sm" onClick={()=>doExport('births')} disabled={!lambs.length}><DL/> CSV</button>
+                  <div className="search-wrap"><div className="search-ico"><SearchIco/></div><input className="search-input" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search tag or ewe..."/></div>
+                </div>
+              </div>
+              {filterTag(lambs).length===0?<div className="empty">{lambs.length?'No matches.':'No lambs yet.'}</div>:(
+                <div className="tbl-wrap">
+                  <table>
+                    <thead><tr><th>Tag #</th><th>Alt</th><th>Date</th><th>Sex</th><th>Wt</th><th>Ewe</th><th>Born as</th><th>Notes</th><th></th></tr></thead>
+                    <tbody>
+                      {filterTag(lambs).map(l=>(
+                        <tr key={l.id}>
+                          <td className="mono" style={{fontWeight:500}}>{l.tagNumber}{l.retagHistory?.length>0&&<span className="badge retagged" style={{marginLeft:4}}>re-tagged</span>}</td>
+                          <td className="mono" style={{color:'#6b7280'}}>{l.tag2||'—'}</td>
+                          <td>{fmtDate(l.birthDate)}</td>
+                          <td><span className={`badge ${l.sex==='male'||l.sex==='ram'?'male':'female'}`}>{l.sex}</span></td>
+                          <td>{l.birthWeight} lbs</td>
+                          <td className="mono">{l.eweNumber}</td>
+                          <td style={{textTransform:'capitalize'}}>{l.numberBorn}</td>
+                          <td className="truncate" title={[l.complications,l.comments].filter(Boolean).join(' | ')}>{[l.complications,l.comments].filter(Boolean).join(' | ')||'—'}</td>
+                          <td style={{display:'flex',gap:2}}>
+                            <button className="btn-icon amber" title="Add med" onClick={()=>setMedModal(l.tagNumber)}><SyringeIco/></button>
+                            <button className="btn-icon blue" title="Re-tag" onClick={()=>setRetagModal(l.tagNumber)}><TagIco/></button>
+                            <button className="btn-icon" title="Delete" onClick={()=>{if(confirm('Delete?'))delLamb(l.id);}}><Trash/></button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ── DISPOSAL TAB ── */}
+        {activeTab==='disposal'&&(
+          <>
+            <div className="card">
+              <div className="section-head"><Plus/> Record Death or Sale</div>
+              <form onSubmit={submitDisp} className="form-grid">
+                <div className="form-group"><label className="form-label">Tag # *</label><input className={`form-input mono ${dispForm.tagNumber?'prefilled':''}`} value={dispForm.tagNumber} onChange={e=>setDisp({...dispForm,tagNumber:e.target.value})} placeholder="Scan EID or type tag #" required autoComplete="off"/><p className="form-hint">Auto-filled from EID scan above</p></div>
+                <div className="form-group"><label className="form-label">Date *</label><input type="date" className="form-input" value={dispForm.date} onChange={e=>setDisp({...dispForm,date:e.target.value})} required/></div>
+                <div className="form-group"><label className="form-label">What Happened *</label><select className="form-select" value={dispForm.whatHappened} onChange={e=>setDisp({...dispForm,whatHappened:e.target.value})} required><option value="">Select...</option><option value="Sold - sale barn">Sold - sale barn</option><option value="Sold - private sale">Sold - private sale</option><option value="Died">Died</option><option value="Other">Other</option></select></div>
+                {dispForm.whatHappened==='Died'&&<div className="form-group col3"><label className="form-label">Cause of Death *</label><input className="form-input" value={dispForm.cause} onChange={e=>setDisp({...dispForm,cause:e.target.value})} placeholder="e.g., illness, predator" required/></div>}
+                {dispForm.whatHappened.startsWith('Sold')&&<><div className="form-group"><label className="form-label">Weight (lbs)</label><input type="number" step="0.1" className="form-input" value={dispForm.weight} onChange={e=>setDisp({...dispForm,weight:e.target.value})} placeholder="e.g., 85"/></div><div className="form-group col2"><label className="form-label">Buyer *</label><input className="form-input" value={dispForm.buyer} onChange={e=>setDisp({...dispForm,buyer:e.target.value})} placeholder="Buyer name or market" required/></div></>}
+                <div className="form-group col3"><label className="form-label">Comments</label><textarea className="form-textarea" rows="2" value={dispForm.comments} onChange={e=>setDisp({...dispForm,comments:e.target.value})}/></div>
+                <div className="col3" style={{display:'flex',gap:'.75rem',flexWrap:'wrap'}}>
+                  <button type="submit" className="btn btn-primary"><Plus/> Add Record</button>
+                  <button type="button" className="btn btn-outline" onClick={()=>setDisp(emptyDisp)}>Clear</button>
+                </div>
+              </form>
+            </div>
+            <div className="card">
+              <div className="toolbar">
+                <div style={{fontWeight:600,color:'#1f2937'}}>Disposal Records ({disposals.length})</div>
+                <div className="search-wrap"><div className="search-ico"><SearchIco/></div><input className="search-input" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search tag..."/></div>
+              </div>
+              {disposals.filter(d=>!search||String(d.tagNumber).toLowerCase().includes(search.toLowerCase())).length===0?<div className="empty">No disposal records yet.</div>:(
+                <div className="tbl-wrap">
+                  <table>
+                    <thead><tr><th>Tag #</th><th>Date</th><th>What Happened</th><th>Cause / Buyer</th><th>Weight</th><th>Comments</th><th></th></tr></thead>
+                    <tbody>
+                      {disposals.filter(d=>!search||String(d.tagNumber).toLowerCase().includes(search.toLowerCase())).map(d=>(
+                        <tr key={d.id}>
+                          <td className="mono" style={{fontWeight:500}}>{d.tagNumber}</td>
+                          <td>{fmtDate(d.date)}</td>
+                          <td><span className={`badge ${d.type==='died'?'died':'sold'}`}>{d.whatHappened||d.type}</span></td>
+                          <td>{d.type==='died'?d.cause:(d.buyer||'—')}</td>
+                          <td>{d.weight?`${d.weight} lbs`:'—'}</td>
+                          <td className="truncate">{d.comments||'—'}</td>
+                          <td><button className="btn-icon" onClick={()=>{if(confirm('Delete?'))delDisp(d.id);}}><Trash/></button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ── MEDS TAB ── */}
+        {activeTab==='meds'&&(
+          <>
+            <div className="card">
+              <div className="section-head"><SyringeIco/> Medication Records</div>
+              <div style={{display:'flex',gap:'.75rem',flexWrap:'wrap'}}>
+                <button className="btn btn-primary" onClick={()=>setMedModal('')}><Plus/> New medication entry</button>
+                <button className="btn btn-blue btn-sm" onClick={()=>doExport('meds')} disabled={!medEvents.length}><DL/> Export CSV</button>
+              </div>
+              <p className="form-hint" style={{marginTop:'.5rem'}}>Also accessible from EID scanner and the 💉 button in Birth Records</p>
+            </div>
+            <div className="card">
+              <div className="toolbar">
+                <div style={{fontWeight:600,color:'#1f2937'}}>Medication Records ({medEvents.length})</div>
+                <div className="search-wrap"><div className="search-ico"><SearchIco/></div><input className="search-input" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search tag or product..."/></div>
+              </div>
+              {medEvents.filter(m=>!search||String(m.tagNumber).toLowerCase().includes(search.toLowerCase())||String(m.product).toLowerCase().includes(search.toLowerCase())).length===0?<div className="empty">No medication records yet.</div>:(
+                <div className="tbl-wrap">
+                  <table>
+                    <thead><tr><th>Tag #</th><th>Date</th><th>Product</th><th>Dosage</th><th>Unit</th><th>Comment</th><th></th></tr></thead>
+                    <tbody>
+                      {[...medEvents].sort((a,b)=>b.date.localeCompare(a.date)).filter(m=>!search||String(m.tagNumber).toLowerCase().includes(search.toLowerCase())||String(m.product).toLowerCase().includes(search.toLowerCase())).map(m=>(
+                        <tr key={m.id}>
+                          <td className="mono" style={{fontWeight:500}}>{m.tagNumber}</td>
+                          <td>{fmtDate(m.date)}</td>
+                          <td style={{fontWeight:500}}>{m.product}</td>
+                          <td>{m.dosage||'—'}</td>
+                          <td>{m.unit||'—'}</td>
+                          <td className="truncate">{m.comment||'—'}</td>
+                          <td><button className="btn-icon" onClick={()=>{if(confirm('Delete?'))delMed(m.id);}}><Trash/></button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ── FEED TAB ── */}
+        {activeTab==='feed'&&(
+          <>
+            <div className="card">
+              <div className="section-head"><LeafIco/> Log Feed / Supply</div>
+              <form onSubmit={submitFeed} className="form-grid">
+                <div className="form-group"><label className="form-label">Date</label><input type="date" className="form-input" value={feedForm.date} onChange={e=>setFeed({...feedForm,date:e.target.value})}/></div>
+                <div className="form-group"><label className="form-label">Who</label><select className="form-select" value={feedForm.who} onChange={e=>setFeed({...feedForm,who:e.target.value})}>{FEED_WHO.map(w=><option key={w} value={w}>{w}</option>)}</select></div>
+                <div className="form-group"><label className="form-label">What is it *</label><select className="form-select" value={feedForm.whatIsIt} onChange={e=>setFeed({...feedForm,whatIsIt:e.target.value})} required><option value="">Select...</option>{FEED_ITEMS.map(f=><option key={f} value={f}>{f}</option>)}</select></div>
+                <div className="form-group"><label className="form-label">Quantity *</label><input type="number" step="any" className="form-input" value={feedForm.quantity} onChange={e=>setFeed({...feedForm,quantity:e.target.value})} placeholder="Amount" required/></div>
+                <div className="form-group"><label className="form-label">Unit</label><select className="form-select" value={feedForm.unit} onChange={e=>setFeed({...feedForm,unit:e.target.value})}>{FEED_UNITS.map(u=><option key={u} value={u}>{u}</option>)}</select></div>
+                <div className="form-group col3"><label className="form-label">Comments</label><input className="form-input" value={feedForm.comments} onChange={e=>setFeed({...feedForm,comments:e.target.value})}/></div>
+                <div className="col3" style={{display:'flex',gap:'.75rem',flexWrap:'wrap'}}>
+                  <button type="submit" className="btn btn-primary"><Plus/> Log Feed</button>
+                  <button type="button" className="btn btn-outline" onClick={()=>setFeed(emptyFeed)}>Clear</button>
+                </div>
+              </form>
+            </div>
+            <div className="card">
+              <div style={{fontWeight:600,color:'#1f2937',marginBottom:'.875rem'}}>Feed Log ({feedLogs.length})</div>
+              {feedLogs.length===0?<div className="empty">No feed records yet.</div>:(
+                <div className="tbl-wrap">
+                  <table>
+                    <thead><tr><th>Date</th><th>Who</th><th>Feed</th><th>Qty</th><th>Unit</th><th>Comments</th><th></th></tr></thead>
+                    <tbody>
+                      {feedLogs.map(f=>(
+                        <tr key={f.id}>
+                          <td>{fmtDate(f.date)}</td><td>{f.who}</td><td style={{fontWeight:500}}>{f.whatIsIt}</td><td>{f.quantity}</td><td>{f.unit}</td>
+                          <td className="truncate">{f.comments||'—'}</td>
+                          <td><button className="btn-icon" onClick={()=>{if(confirm('Delete?'))delFeed(f.id);}}><Trash/></button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ── BREEDING TAB ── */}
+        {activeTab==='breeding'&&(
+          <BreedingTab lambs={lambs} breedingGroups={breedingGroups} cidrEvents={cidrEvents}
+            onSaveGroup={saveBreedGrp} onDeleteGroup={delBreedGrp}
+            onSaveCidr={saveCidr} onDeleteCidr={delCidr}/>
+        )}
+
+        {/* ── SALE GROUPS TAB ── */}
+        {activeTab==='sale'&&(
+          <SaleGroupTab lambs={lambs} saleGroups={saleGroups} onSave={saveSaleGrp} onDelete={delSaleGrp}/>
+        )}
+
+        {/* ── EXPORT TAB ── */}
+        {activeTab==='export'&&(
+          <ExportTab
+            counts={{births:lambs.length,disposals:disposals.length,meds:medEvents.length,feed:feedLogs.length,saleGroups:saleGroups.length,breedingGroups:breedingGroups.length,cidrEvents:cidrEvents.length,retagLog:retagLog.length}}
+            onExport={doExport}/>
+        )}
+
+        {/* ── RETAG TAB ── */}
+        {activeTab==='retag'&&(
+          <RetagTab lambs={lambs} retagLog={retagLog} onRetag={tag=>setRetagModal(tag)}/>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>, document.getElementById('root'));
+</script>
 </body>
 </html>
